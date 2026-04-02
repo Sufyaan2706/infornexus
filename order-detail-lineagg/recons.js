@@ -13,14 +13,10 @@ const decoded = rawFixed
     .replace(/\\\\/g, '\\')
     .replace(/\\"/g, '"');
 
-// Parse the decoded string into a JSON object
 const obj = JSON.parse(decoded);
 
-// Convert the object back to a JSON string with an indent of 2
 const output = JSON.stringify(obj, null, 2);
 
-// Print to console
 console.log(output);
 
-// Write to the output file
 fs.writeFileSync('recons.json', output, 'utf-8');
