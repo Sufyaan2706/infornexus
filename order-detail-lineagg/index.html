@@ -1,117 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Detail Object</title>
-
-<style>
-
-h1 {
-  text-align: center;
-  text-transform: uppercase;
-  color: black;
-}
-
-h2 {
-  text-align: left;
-}
-
-p {
-  text-indent: 50px;
-  text-align: justify;
-  letter-spacing: 3px;
-}
-
-a {
-  text-decoration: none;
-  color: #008CBA;
-}
-
-table {
-  font-family: Arial, Helvetica, sans-serif;
-  text-align: center;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-td, th {
-  border: 1px solid #ddd;
-  text-align: center;
-  padding: 3px;
-}
-
-tr:nth-child(even){background-color: #f2f2f2;}
-
-tr:hover {background-color: #ddd;}
-
-th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #003366;
-  color: white;
-  text-align: center;
-}
-
-img {
-  padding: 5px;
-  height: 100px;
-}
-
-.search-bar {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  padding: 10px;
-}
-
-
-
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Order Detail Object</title>
 
 </head>
+
 <body>
-    <main>
+  <main>
 
-      <section>
-       
-<header>
-<div class="container"></div>
-	<nav>
-   
-     <a href="/index.html"><img src="/image/rt_knits_logo.png" alt="RT Knits" class="m-logo"></a>
+    <section>
+
+      <header>
+        <div class="container"></div>
+        <nav>
+
+          <a href="/index.html"><img src="image/rt_knits_logo.png" alt="RT Knits" class="m-logo"></a>
 
 
-     
-     <div class="search-bar">
-      <input type="text" id="search" placeholder="Search bugs..." />
-      <button onclick="searchData()">Search</button>
-     <div id="debug"></div>
-     </div>
-   
-  </nav>
 
-</header>
+          <div class="search-bar">
+            <input type="text" id="search" placeholder="Search bugs..." />
+            <button onclick="searchData()">Search</button>
+            <div id="debug"></div>
+          </div>
 
-      </section>
+        </nav>
 
-      <section>
+      </header>
+
+    </section>
+
+    <section>
       <div class="container">
         <div>
-            <h1>Order Details</h1>
-            
+          <h1>Order Details</h1>
+
         </div>
 
-    <div class="table-style">
-<table>
-    <div id="container"></div>
-</table>
-    </div>
+        <div class="table-style">
+          <table>
+            <div id="container"></div>
+          </table>
+        </div>
       </div>
     </section>
-</main>
-<script src="script.js"></script>
+
+    <div id="output"></div>
+
+  </main>
+  <script src="app.js"></script>
+  <script src="test.js"></script>
 </body>
+
 </html>

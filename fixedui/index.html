@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Order Detail Object</title>
+</head>
+
+<body>
+    <main>
+        <section>
+            <header>
+                <nav>
+                    <a href="/index.html">
+                        <img src="image/rt_knits_logo.png" alt="RT Knits" class="m-logo">
+                    </a>
+
+                    <div class="search-bar">
+                        <select id="searchType" style="padding: 5px; margin-right: 5px;">
+                            <option value="poNumber">PO Number</option>
+                            <option value="orderUid">Order UID</option>
+                        </select>
+                        <input type="text" id="searchInput" placeholder="Enter Search Value..." />
+                        <button onclick="searchData()">Search</button>
+                        <div id="debug"></div>
+                    </div>
+                </nav>
+            </header>
+        </section>
+
+        <section>
+            <div class="container">
+                <div>
+                    <h1>Order Details</h1>
+                </div>
+
+                <div class="table-style">
+                    <div id="container"></div>
+                </div>
+            </div>
+        </section>
+
+        <div id="output"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

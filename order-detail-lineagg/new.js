@@ -1,44 +1,21 @@
 const myHeaders = new Headers();
-const uname = "admin";
-const pw = '/K5="84@p3gNL<b#';
-
-const creds = btoa(`${uname}:${pw}`);
-
-console.log(creds)
-
+myHeaders.append("Accept", "application/pdf");
 myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
-
-myHeaders.append("Authorization", `Basic ${creds}`);
-
+myHeaders.append("Authorization", "");
 
 const urlencoded = new URLSearchParams();
-
-urlencoded.append("url", "https://network.infornexus.com/rest / 3.1.0 / OrderDetail / 540027620376");
-
+urlencoded.append("url", "https://network.infornexus.com/rest/3.1/OrderDetail/query?oql=poNumber%3D%274801373753%27");
 urlencoded.append("request_method", "GET");
-
-urlencoded.append("customer", "adidas_sa_ltd");
-
+urlencoded.append("customer", "puma");
 
 const requestOptions = {
-
     method: "POST",
-
     headers: myHeaders,
-
     body: urlencoded,
-
     redirect: "follow"
-
 };
 
-
-fetch("http://10.0.0.87:8082/api/infornexus/auth",
-    requestOptions)
-
+fetch("http://10.0.0.87:8082/api/infornexus/auth", requestOptions)
     .then((response) => response.text())
-
     .then((result) => console.log(result))
-
     .catch((error) => console.error(error));

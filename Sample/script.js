@@ -3,7 +3,7 @@ let globalData = [];
 fetch('data.json')
   .then(response => response.json())
   .then(orderData => {
-    
+
 
     // Group items by LineAggregator
     const groups = {};
@@ -64,7 +64,7 @@ fetch('data.json')
         row.innerHTML = `
         
           <td><span class="status">${bi.itemUid ?? '—'}</span></td>
-          <td><span class="number">${ref.MarketPoNumber ?? '—'}</span></td>
+          <td><span class="number">${orderData.poNumber ?? '—'}</span></td>
           <td><span class="description">${id.ShortDescription ?? '—'}</span></td>
           <td><span class="brand">${ref.BrandDescription ?? '—'}</span></td>
           <td><span class="status">${ref.ItemStatus ?? '—'}</span></td>
