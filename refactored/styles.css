@@ -117,7 +117,6 @@ img {
 
 .original-table-wrapper {
     flex: 1;
-    /* Takes up equal space */
     min-width: 0;
 }
 
@@ -214,7 +213,7 @@ img {
     flex-wrap: wrap;
     gap: 15px;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
 }
 
 .global-size-block {
