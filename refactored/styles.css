@@ -25,7 +25,6 @@ table {
     text-align: center;
     border-collapse: collapse;
     width: 100%;
-    /* Changed from 50% to allow flexbox layout to control width */
 }
 
 td,
@@ -63,7 +62,6 @@ img {
     padding: 10px;
 }
 
-/* --- New Classes Added from JS Refactoring --- */
 
 .error {
     color: red;
@@ -109,7 +107,6 @@ img {
     background-color: #00509e;
 }
 
-/* Flexbox Layout for Side-by-Side Tables */
 .tables-container {
     display: flex;
     gap: 20px;
@@ -126,13 +123,10 @@ img {
 
 .packing-container {
     flex: 1;
-    /* Takes up equal space */
     min-width: 0;
     overflow-x: auto;
-    /* Allows scrolling if size columns get too wide */
 }
 
-/* Packing Table Specific Styles */
 .packing-table {
     margin-top: 0;
     font-size: 14px;
@@ -201,4 +195,67 @@ img {
 .highlight-cell {
     font-weight: bold;
     background-color: #fafafa;
+}
+
+.global-settings {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.global-settings h3 {
+    margin-top: 0;
+}
+
+.global-sizes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.global-size-block {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    background: white;
+    text-align: center;
+    width: 100px;
+}
+
+.global-size-block strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #003366;
+}
+
+.global-size-block .input-group {
+    font-size: 11px;
+    text-align: left;
+}
+
+.global-size-block .input-group-margin {
+    margin-bottom: 5px;
+}
+
+.global-size-block input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px;
+}
+
+.global-apply-block {
+    width: 100%;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.global-export-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 12px 24px;
+    font-size: 16px;
 }

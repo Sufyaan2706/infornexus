@@ -8,16 +8,78 @@ export function renderTables(orderData, containerElement) {
     }
 
     const groups = {};
+    const allUniqueSizes = new Set();
+
     orderData.orderItem.forEach((item) => {
-        const ref = item.baseItem?.reference || {};
+        const bi = item.baseItem || {};
+        const ref = bi.reference || {};
+        const id = bi.itemIdentifier || {};
+
         const lineAgg = ref.LineAggregator ?? 'Unknown';
         if (!groups[lineAgg]) groups[lineAgg] = [];
         groups[lineAgg].push(item);
+
+        const size = id.IdBuyerSize;
+        if (size && size !== '-') {
+            allUniqueSizes.add(escapeHTML(size));
+        }
     });
+
+    const sortedGlobalSizes = Array.from(allUniqueSizes).sort(compareSizes);
+
+    // --- Global Settings Grid (Cleaned up with CSS Classes) ---
+    const globalSettings = document.createElement('div');
+    globalSettings.className = 'global-settings';
+
+    const headerTitle = document.createElement('h3');
+    headerTitle.innerText = "Default Settings Per Size";
+    globalSettings.appendChild(headerTitle);
+
+    const sizesContainer = document.createElement('div');
+    sizesContainer.className = 'global-sizes-container';
+
+    sortedGlobalSizes.forEach(size => {
+        const sizeBlock = document.createElement('div');
+        sizeBlock.className = 'global-size-block';
+        sizeBlock.innerHTML = `
+            <strong>${size}</strong>
+            <div class="input-group input-group-margin">
+                Max Qty: <br>
+                <input type="number" class="global-max-qty" data-size="${size}" value="50" min="1">
+            </div>
+            <div class="input-group">
+                Weight: <br>
+                <input type="number" class="global-weight" data-size="${size}" step="0.1" min="0" placeholder="0.0">
+            </div>
+        `;
+        sizesContainer.appendChild(sizeBlock);
+    });
+
+    const applyBtnBlock = document.createElement('div');
+    applyBtnBlock.className = 'global-apply-block';
+    applyBtnBlock.innerHTML = `<button id="apply-globals-btn" class="pack-btn">Apply Defaults to All Tables</button>`;
+
+    globalSettings.appendChild(sizesContainer);
+    globalSettings.appendChild(applyBtnBlock);
+    containerElement.appendChild(globalSettings);
 
     const orderWrapper = document.createElement('div');
     orderWrapper.className = 'order-section';
     orderWrapper.innerHTML = `<h2>Order Details (UID: <span class="uid-text">${escapeHTML(orderData.__metadata?.uid || 'Unknown')}</span>)</h2>`;
+
+    const getGlobalMaps = () => {
+        const maxMap = {};
+        const wMap = {};
+        document.querySelectorAll('.global-max-qty').forEach(input => {
+            maxMap[input.getAttribute('data-size')] = parseInt(input.value, 10) || 50;
+        });
+        document.querySelectorAll('.global-weight').forEach(input => {
+            wMap[input.getAttribute('data-size')] = input.value;
+        });
+        return { maxMap, wMap };
+    };
+
+    const renderTriggers = [];
 
     Object.keys(groups).forEach(lineAgg => {
         const items = groups[lineAgg];
@@ -26,11 +88,6 @@ export function renderTables(orderData, containerElement) {
         const lineAggSection = document.createElement('div');
         lineAggSection.className = 'line-agg-section';
         lineAggSection.innerHTML = `<h3>Line Aggregator: ${escapeHTML(lineAgg)}</h3>`;
-
-        const packBtn = document.createElement('button');
-        packBtn.className = 'pack-btn';
-        packBtn.innerText = 'Generate Packing List';
-        lineAggSection.appendChild(packBtn);
 
         const tablesContainer = document.createElement('div');
         tablesContainer.className = 'tables-container';
@@ -51,6 +108,7 @@ export function renderTables(orderData, containerElement) {
             const bi = item.baseItem || {};
             const ref = bi.reference || {};
             const id = bi.itemIdentifier || {};
+            const itemVar = bi.itemVariance || {};
             const qty = parseFloat(bi.quantity || 0);
             totalQty += qty;
 
@@ -61,8 +119,8 @@ export function renderTables(orderData, containerElement) {
                     <td><span class="brand">${escapeHTML(ref.AdidasShipMode)}</span></td>
                     <td><span class="status">${escapeHTML(ref.ItemStatus)}</span></td>
                     <td><span class="qty">${escapeHTML(bi.quantity)}</span></td>
-                    <td><span class="qty">${escapeHTML(bi.itemVariance.upperVariance)}</span></td>
-                    <td><span class="qty">${escapeHTML(bi.itemVariance.lowerVariance)}</span></td>
+                    <td><span class="qty">${escapeHTML(itemVar.upperVariance || 0)}</span></td>
+                    <td><span class="qty">${escapeHTML(itemVar.lowerVariance || 0)}</span></td>
                 </tr>
             `;
         });
@@ -82,23 +140,36 @@ export function renderTables(orderData, containerElement) {
         tablesContainer.appendChild(originalTableWrapper);
         tablesContainer.appendChild(packingContainer);
         lineAggSection.appendChild(tablesContainer);
-
-        packBtn.onclick = () => createPackingUI(items, packingContainer);
         orderWrapper.appendChild(lineAggSection);
+
+        const initialMaps = getGlobalMaps();
+        createPackingUI(items, packingContainer, initialMaps.maxMap, initialMaps.wMap);
+
+        renderTriggers.push(() => {
+            const maps = getGlobalMaps();
+            createPackingUI(items, packingContainer, maps.maxMap, maps.wMap);
+        });
     });
 
     containerElement.appendChild(orderWrapper);
 
+    const applyBtn = document.getElementById('apply-globals-btn');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+            renderTriggers.forEach(trigger => trigger());
+        });
+    }
+
+    // Extracted inline styling to .global-export-btn class
     const globalExportBtn = document.createElement('button');
-    globalExportBtn.className = 'pack-btn';
-    globalExportBtn.style.cssText = 'display: block; margin: 20px auto; padding: 12px 24px; font-size: 16px;';
+    globalExportBtn.className = 'pack-btn global-export-btn';
     globalExportBtn.innerText = 'Export All to JSON';
     globalExportBtn.onclick = () => extractOrderDataToJson(orderData);
 
     containerElement.appendChild(globalExportBtn);
 }
 
-export function createPackingUI(items, packingContainer) {
+export function createPackingUI(items, packingContainer, globalMaxQtyMap = {}, globalWeightMap = {}) {
     packingContainer.innerHTML = '';
     const maxQtyMap = {};
     const weightMap = {};
@@ -109,8 +180,8 @@ export function createPackingUI(items, packingContainer) {
         const size = escapeHTML(id.IdBuyerSize);
         const qty = parseInt(bi.quantity, 10);
         if (!isNaN(qty) && qty > 0 && size !== '-') {
-            maxQtyMap[size] = 0;
-            weightMap[size] = '';
+            maxQtyMap[size] = globalMaxQtyMap[size] > 0 ? globalMaxQtyMap[size] : 50;
+            weightMap[size] = globalWeightMap[size] !== undefined ? globalWeightMap[size] : '';
         }
     });
 
@@ -135,7 +206,7 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
             let placed = false;
             for (let i = 0; i < batches.length; i++) {
                 if (!batches[i].some(bItem => bItem.size === size)) {
-                    batches[i].push({ size, qty, seqNo }); // Store it in the batch
+                    batches[i].push({ size, qty, seqNo });
                     placed = true;
                     break;
                 }
@@ -167,10 +238,10 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
                     ${sizes.map(s => `<th>${s}</th>`).join('')}
                 </tr>
                 <tr class="input-row">
-                    <td colspan="1" class="input-label">Input max box quantity:</td>
+                    <td colspan="1" class="input-label">Input max quantity per box:</td>
                     ${sizes.map(s => `
                         <td>
-                            <input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s]}" min="1">
+                            <input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" placeholder="Qty" min="1">
                         </td>
                     `).join('')}
                     <td colspan="2"></td>
@@ -198,50 +269,52 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
             let remainingQty = item.qty;
             const maxQty = maxQtyMap[currentSize];
 
-            const fullCartons = Math.floor(remainingQty / maxQty);
-            const remainder = remainingQty % maxQty;
+            if (maxQty && maxQty > 0) {
+                const fullCartons = Math.floor(remainingQty / maxQty);
+                const remainder = remainingQty % maxQty;
 
-            if (fullCartons > 0) {
-                const startCtn = cartonNo;
-                const endCtn = cartonNo + fullCartons - 1;
-                const ctnString = startCtn === endCtn ? `${startCtn}` : `${startCtn}-${endCtn}`;
+                if (fullCartons > 0) {
+                    const startCtn = cartonNo;
+                    const endCtn = cartonNo + fullCartons - 1;
+                    const ctnString = startCtn === endCtn ? `${startCtn}` : `${startCtn}-${endCtn}`;
 
-                let rowHtml = `<tr>
-                    <td class="bold-text">${ctnString}</td>`;
+                    let rowHtml = `<tr>
+                        <td class="bold-text">${ctnString}</td>`;
 
-                sizes.forEach(s => {
-                    rowHtml += `<td>
-                        ${s === currentSize ? `<input type="text" value="${maxQty}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}
-                    </td>`;
-                });
-                rowHtml += `
-                    <td class="highlight-cell">${fullCartons}</td>
-                    <td class="highlight-cell">${fullCartons * maxQty}</td>
-                </tr>`;
+                    sizes.forEach(s => {
+                        rowHtml += `<td>
+                            ${s === currentSize ? `<input type="text" value="${maxQty}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}
+                        </td>`;
+                    });
+                    rowHtml += `
+                        <td class="highlight-cell">${fullCartons}</td>
+                        <td class="highlight-cell">${fullCartons * maxQty}</td>
+                    </tr>`;
 
-                html += rowHtml;
-                cartonNo = endCtn + 1;
-            }
+                    html += rowHtml;
+                    cartonNo = endCtn + 1;
+                }
 
-            if (remainder > 0) {
-                const ctnString = `${cartonNo}`;
+                if (remainder > 0) {
+                    const ctnString = `${cartonNo}`;
 
-                let rowHtml = `<tr>
-                    <td class="bold-text">${ctnString}</td>`;
+                    let rowHtml = `<tr>
+                        <td class="bold-text">${ctnString}</td>`;
 
-                sizes.forEach(s => {
-                    rowHtml += `<td>
-                        ${s === currentSize ? `<input type="text" value="${remainder}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}
-                    </td>`;
-                });
+                    sizes.forEach(s => {
+                        rowHtml += `<td>
+                            ${s === currentSize ? `<input type="text" value="${remainder}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}
+                        </td>`;
+                    });
 
-                rowHtml += `
-                    <td class="highlight-cell">1</td>
-                    <td class="highlight-cell">${remainder}</td>
-                </tr>`;
+                    rowHtml += `
+                        <td class="highlight-cell">1</td>
+                        <td class="highlight-cell">${remainder}</td>
+                    </tr>`;
 
-                html += rowHtml;
-                cartonNo++;
+                    html += rowHtml;
+                    cartonNo++;
+                }
             }
         });
     });
@@ -249,7 +322,6 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
     html += `</tbody></table>`;
     container.innerHTML = html;
 
-    // Listener for Max Qty changes
     const headerInputs = container.querySelectorAll('.max-qty-header-input');
     headerInputs.forEach(input => {
         input.addEventListener('change', (e) => {
@@ -261,12 +333,11 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
                 renderPackingTable(items, maxQtyMap, weightMap, container);
             } else {
                 alert('Please enter a valid number greater than 0');
-                e.target.value = maxQtyMap[updatedSize];
+                e.target.value = maxQtyMap[updatedSize] || '';
             }
         });
     });
 
-    // Listener for Weight changes
     const weightInputs = container.querySelectorAll('.weight-header-input');
     weightInputs.forEach(input => {
         input.addEventListener('input', (e) => {
