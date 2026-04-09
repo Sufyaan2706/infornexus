@@ -1,5 +1,8 @@
-export const uname = "admin";
-export const pw = '/K5="84@p3gNL<b#';
+import { UNAME, PW } from './secrets.js';
+
+export const uname = UNAME;
+export const pw = PW;
+
 export const creds = btoa(`${uname}:${pw}`);
 
 export const PROXY_URL = "http://10.0.0.87:8082/api/infornexus/auth";
