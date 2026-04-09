@@ -1,0 +1,204 @@
+h1 {
+    text-align: center;
+    text-transform: uppercase;
+    color: black;
+}
+
+h2 {
+    text-align: left;
+}
+
+p {
+    text-indent: 50px;
+    text-align: justify;
+    letter-spacing: 3px;
+}
+
+a {
+    text-decoration: none;
+    color: #008CBA;
+}
+
+/* Base table styles */
+table {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    border-collapse: collapse;
+    width: 100%;
+    /* Changed from 50% to allow flexbox layout to control width */
+}
+
+td,
+th {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 3px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: #003366;
+    color: white;
+}
+
+img {
+    padding: 5px;
+    height: 100px;
+}
+
+.search-bar {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+}
+
+/* --- New Classes Added from JS Refactoring --- */
+
+.error {
+    color: red;
+    margin-top: 10px;
+}
+
+.empty-pack-msg {
+    color: red;
+    margin-top: 15px;
+}
+
+.loading {
+    margin-top: 10px;
+}
+
+.bold-text {
+    font-weight: bold;
+}
+
+.uid-text {
+    color: #666;
+}
+
+.order-section {
+    margin-bottom: 40px;
+}
+
+.line-agg-section {
+    margin-bottom: 30px;
+}
+
+.pack-btn {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 8px 16px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.pack-btn:hover {
+    background-color: #00509e;
+}
+
+/* Flexbox Layout for Side-by-Side Tables */
+.tables-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.original-table-wrapper {
+    flex: 1;
+    /* Takes up equal space */
+    min-width: 0;
+}
+
+.packing-container {
+    flex: 1;
+    /* Takes up equal space */
+    min-width: 0;
+    overflow-x: auto;
+    /* Allows scrolling if size columns get too wide */
+}
+
+/* Packing Table Specific Styles */
+.packing-table {
+    margin-top: 0;
+    font-size: 14px;
+    border: 1px solid #ccc;
+}
+
+.packing-table th,
+.packing-table td {
+    padding: 8px;
+}
+
+.packing-table thead {
+    background-color: #eee;
+}
+
+.packing-table th {
+    background-color: #eee;
+    color: black;
+    /* Override base th */
+    border-color: #ccc;
+}
+
+.packing-table .input-row {
+    background-color: #fdfdfd;
+}
+
+.packing-table .input-label {
+    text-align: right;
+    font-size: 11px;
+    color: #555;
+    font-style: italic;
+    padding: 5px;
+}
+
+.max-qty-header-input {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 4%;
+}
+
+.weight-header-input {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 4%;
+
+}
+
+.transparent-input {
+    width: 100%;
+    border: none;
+    text-align: center;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+.transparent-input:focus {
+    outline: 1px solid #008CBA;
+}
+
+.highlight-cell {
+    font-weight: bold;
+    background-color: #fafafa;
+}

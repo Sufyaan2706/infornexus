@@ -295,7 +295,7 @@ function renderTables(orderData) {
 
 function createPackingUI(items, packingContainer) {
     packingContainer.innerHTML = '';
-    const defaultMaxQty = 50;
+    const defaultMaxQty = 0;
     const maxQtyMap = {};
     const weightMap = {};
 
@@ -406,12 +406,10 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
                     <td class="bold-text">${ctnString}</td>`;
 
                 sizes.forEach(s => {
-                    // Added data-seq attribute here
                     rowHtml += `<td>
                         ${s === currentSize ? `<input type="text" value="${maxQty}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}
                     </td>`;
                 });
-
                 rowHtml += `
                     <td class="highlight-cell">${fullCartons}</td>
                     <td class="highlight-cell">${fullCartons * maxQty}</td>
@@ -428,7 +426,6 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
                     <td class="bold-text">${ctnString}</td>`;
 
                 sizes.forEach(s => {
-                    // Added data-seq attribute here
                     rowHtml += `<td>
                         ${s === currentSize ? `<input type="text" value="${remainder}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}
                     </td>`;
@@ -501,7 +498,7 @@ function extractOrderDataToJson(orderData) {
 
         if (!jsonSchema[lineAgg][size]) {
             jsonSchema[lineAgg][size] = {
-                maxBoxQty: 50,
+                maxBoxQty: 0,
                 weightPerItem: 0,
                 totalShipmentQtyPerSize: 0,
                 items: []
@@ -550,7 +547,6 @@ function extractOrderDataToJson(orderData) {
                 // 3. Scrape Carton Numbers PER ITEM based on Sequence Number
                 sizeData.items.forEach(item => {
                     const seq = escapeHTML(item.itemSequenceNo);
-                    // Find all input boxes that match this exact item sequence number
                     const inputs = packingContainer.querySelectorAll(`.transparent-input[data-seq="${seq}"]`);
 
                     const cartonNumbersList = [];
