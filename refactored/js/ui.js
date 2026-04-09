@@ -41,7 +41,7 @@ export function renderTables(orderData, containerElement) {
         const table = document.createElement('table');
         table.innerHTML = `
             <thead>
-                <tr><th>Size</th><th>Item Sequence Number</th><th>Ship Mode</th><th>Item Status</th><th>Quantity</th></tr>
+                <tr><th>Size</th><th>Item Sequence Number</th><th>Ship Mode</th><th>Item Status</th><th>Quantity</th><th>Upper Variance</th><th>Lower Variance</th></tr>
             </thead>
             <tbody></tbody>
         `;
@@ -61,6 +61,8 @@ export function renderTables(orderData, containerElement) {
                     <td><span class="brand">${escapeHTML(ref.AdidasShipMode)}</span></td>
                     <td><span class="status">${escapeHTML(ref.ItemStatus)}</span></td>
                     <td><span class="qty">${escapeHTML(bi.quantity)}</span></td>
+                    <td><span class="qty">${escapeHTML(bi.itemVariance.upperVariance)}</span></td>
+                    <td><span class="qty">${escapeHTML(bi.itemVariance.lowerVariance)}</span></td>
                 </tr>
             `;
         });
