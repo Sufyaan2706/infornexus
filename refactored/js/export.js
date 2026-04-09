@@ -1,4 +1,4 @@
-import { escapeHTML } from './utils.js';
+import { escapeHTML, compareSizes } from './utils.js';
 
 export function extractOrderDataToJson(orderData) {
     if (!orderData || !Array.isArray(orderData.orderItem)) {
@@ -43,6 +43,7 @@ export function extractOrderDataToJson(orderData) {
         jsonSchema[lineAgg][size].totalShipmentQtyPerSize += qty;
     });
 
+    // --- Pass 2: Scrape the UI for inputs and carton numbers ---
     for (const lineAgg in jsonSchema) {
         const safeLineAggId = `packing-${lineAgg.replace(/\W/g, '_')}`;
         const packingContainer = document.getElementById(safeLineAggId);
@@ -73,7 +74,28 @@ export function extractOrderDataToJson(orderData) {
         }
     }
 
-    const jsonString = JSON.stringify(jsonSchema, null, 2);
+    // --- Pass 3: Rebuild the object with Sorted Size Keys ---
+    const sortedJsonSchema = {};
+    
+    // Optional: Sort the Line Aggregators alphabetically as well
+    const sortedLineAggs = Object.keys(jsonSchema).sort();
+    
+    sortedLineAggs.forEach(lineAgg => {
+        sortedJsonSchema[lineAgg] = {};
+        
+        // Grab the sizes for this line aggregator and sort them using your utility function
+        const sortedSizes = Object.keys(jsonSchema[lineAgg]).sort(compareSizes);
+        
+        // Insert them into the new object in the sorted order
+        sortedSizes.forEach(size => {
+            sortedJsonSchema[lineAgg][size] = jsonSchema[lineAgg][size];
+        });
+    });
+
+    // Stringify the nicely sorted object
+    const jsonString = JSON.stringify(sortedJsonSchema, null, 2);
+    console.log("=== Extracted Data matching Schema ===");
     console.log(jsonString);
-    return jsonSchema;
+    
+    return sortedJsonSchema;
 }
