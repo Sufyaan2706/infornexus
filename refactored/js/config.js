@@ -1,7 +1,4 @@
-import { UNAME, PW } from './secrets.js';
-
-export const uname = UNAME;
-export const pw = PW;
+import { uname, pw } from './secrets.js';
 
 export const creds = btoa(`${uname}:${pw}`);
 
