@@ -27,7 +27,6 @@ export function renderTables(orderData, containerElement) {
 
     const sortedGlobalSizes = Array.from(allUniqueSizes).sort(compareSizes);
 
-    // --- Global Settings Grid (Cleaned up with CSS Classes) ---
     const globalSettings = document.createElement('div');
     globalSettings.className = 'global-settings';
 
