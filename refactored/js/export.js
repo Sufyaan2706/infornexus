@@ -6,7 +6,16 @@ export function extractOrderDataToJson(orderData) {
         return null;
     }
 
-    const jsonSchema = {};
+    const poNumber = orderData.poNumber ?? 'Unknown_PO';
+    const uid = orderData.orderUid ?? orderData.__metadata?.uid ?? 'Unknown_UID';
+
+    const jsonSchema = {
+        [poNumber]: {
+            [uid]: {}
+        }
+    };
+
+    const lineAggsLevel = jsonSchema[poNumber][uid];
 
     orderData.orderItem.forEach((item) => {
         const bi = item.baseItem || {};
@@ -19,9 +28,9 @@ export function extractOrderDataToJson(orderData) {
         const lineAgg = ref.LineAggregator ?? 'Unknown';
         const size = id.IdBuyerSize ?? 'Unknown';
 
-        if (!jsonSchema[lineAgg]) jsonSchema[lineAgg] = {};
-        if (!jsonSchema[lineAgg][size]) {
-            jsonSchema[lineAgg][size] = {
+        if (!lineAggsLevel[lineAgg]) lineAggsLevel[lineAgg] = {};
+        if (!lineAggsLevel[lineAgg][size]) {
+            lineAggsLevel[lineAgg][size] = {
                 maxBoxQty: 0,
                 weightPerItem: 0,
                 totalShipmentQtyPerSize: 0,
@@ -39,18 +48,17 @@ export function extractOrderDataToJson(orderData) {
             variance: { ub: uvariance, lb: lvariance }
         };
 
-        jsonSchema[lineAgg][size].items.push(itemDetail);
-        jsonSchema[lineAgg][size].totalShipmentQtyPerSize += qty;
+        lineAggsLevel[lineAgg][size].items.push(itemDetail);
+        lineAggsLevel[lineAgg][size].totalShipmentQtyPerSize += qty;
     });
 
-    // --- Pass 2: Scrape the UI for inputs and carton numbers ---
-    for (const lineAgg in jsonSchema) {
+    for (const lineAgg in lineAggsLevel) {
         const safeLineAggId = `packing-${lineAgg.replace(/\W/g, '_')}`;
         const packingContainer = document.getElementById(safeLineAggId);
 
         if (packingContainer && packingContainer.querySelector('table')) {
-            for (const size in jsonSchema[lineAgg]) {
-                const sizeData = jsonSchema[lineAgg][size];
+            for (const size in lineAggsLevel[lineAgg]) {
+                const sizeData = lineAggsLevel[lineAgg][size];
 
                 const maxQtyInput = packingContainer.querySelector(`.max-qty-header-input[data-size="${size}"]`);
                 if (maxQtyInput && maxQtyInput.value) sizeData.maxBoxQty = parseInt(maxQtyInput.value, 10);
@@ -74,28 +82,27 @@ export function extractOrderDataToJson(orderData) {
         }
     }
 
-    // --- Pass 3: Rebuild the object with Sorted Size Keys ---
-    const sortedJsonSchema = {};
-    
-    // Optional: Sort the Line Aggregators alphabetically as well
-    const sortedLineAggs = Object.keys(jsonSchema).sort();
-    
+    const sortedJsonSchema = {
+        [poNumber]: {
+            [uid]: {}
+        }
+    };
+
+    const sortedLineAggsLevel = sortedJsonSchema[poNumber][uid];
+    const sortedLineAggs = Object.keys(lineAggsLevel).sort();
+
     sortedLineAggs.forEach(lineAgg => {
-        sortedJsonSchema[lineAgg] = {};
-        
-        // Grab the sizes for this line aggregator and sort them using your utility function
-        const sortedSizes = Object.keys(jsonSchema[lineAgg]).sort(compareSizes);
-        
-        // Insert them into the new object in the sorted order
+        sortedLineAggsLevel[lineAgg] = {};
+
+        const sortedSizes = Object.keys(lineAggsLevel[lineAgg]).sort(compareSizes);
+
         sortedSizes.forEach(size => {
-            sortedJsonSchema[lineAgg][size] = jsonSchema[lineAgg][size];
+            sortedLineAggsLevel[lineAgg][size] = lineAggsLevel[lineAgg][size];
         });
     });
 
-    // Stringify the nicely sorted object
     const jsonString = JSON.stringify(sortedJsonSchema, null, 2);
-    console.log("=== Extracted Data matching Schema ===");
     console.log(jsonString);
-    
+
     return sortedJsonSchema;
 }
