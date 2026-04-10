@@ -19,6 +19,12 @@ a {
     color: #008CBA;
 }
 
+.m-logo {
+    width: auto;
+    height: 50px;
+}
+
+
 /* Base table styles */
 table {
     font-family: Arial, Helvetica, sans-serif;
