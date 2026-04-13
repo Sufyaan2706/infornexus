@@ -24,5 +24,6 @@
   "homepage": "https://github.com/Sufyaan2706/infornexus#readme",
   "devDependencies": {
     "vite": "^8.0.8"
-  }
+  },
+  "type": "module"
 }
