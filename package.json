@@ -1,0 +1,28 @@
+{
+  "name": "infornexus",
+  "version": "1.0.0",
+  "description": "Utility for Orderdetail",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sufyaan2706/infornexus.git"
+  },
+  "keywords": [
+    "orderDetail"
+  ],
+  "author": "Mukul, Sufyaan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sufyaan2706/infornexus/issues"
+  },
+  "homepage": "https://github.com/Sufyaan2706/infornexus#readme",
+  "devDependencies": {
+    "vite": "^8.0.8"
+  }
+}
