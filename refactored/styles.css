@@ -264,3 +264,63 @@ img {
     padding: 12px 24px;
     font-size: 16px;
 }
+
+/* Navigation block — sits below the order heading */
+.line-agg-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: #f0f4f8;
+    border: 1px solid #d0d9e4;
+    border-radius: 6px;
+    margin: 16px 0;
+}
+
+.line-agg-nav-label {
+    font-weight: bold;
+    font-size: 13px;
+    color: #1E3A5F;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.line-agg-nav-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Each nav button */
+.line-agg-nav-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #1E3A5F;
+    border: 1px solid #2E75B6;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.line-agg-nav-btn:hover {
+    background-color: #d5e8f0;
+}
+
+/* Active (currently viewed) LineAggregator button */
+.line-agg-nav-btn.active {
+    background-color: #1E3A5F;
+    color: #ffffff;
+    border-color: #1E3A5F;
+}
+
+/* Pages container */
+.line-agg-pages {
+    margin-top: 8px;
+}
+
+/* Each individual page — shown/hidden by JS */
+.line-agg-page {
+    display: none; /* JS sets display:block for the active page */
+}
