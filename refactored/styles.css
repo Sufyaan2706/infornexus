@@ -2,10 +2,12 @@ h1 {
     text-align: center;
     text-transform: uppercase;
     color: black;
+    margin-bottom: 10px;
 }
 
 h2 {
     text-align: left;
+    margin: 10px 0;
 }
 
 p {
@@ -24,20 +26,20 @@ a {
     height: 50px;
 }
 
-
-/* Base table styles */
+/* Base table styles (Restored for Pages/All View) */
 table {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     border-collapse: collapse;
     width: 100%;
+    font-size: 14px;
 }
 
 td,
 th {
     border: 1px solid #ddd;
     text-align: center;
-    padding: 3px;
+    padding: 8px;
 }
 
 tr:nth-child(even) {
@@ -58,7 +60,7 @@ th {
 
 img {
     padding: 5px;
-    height: 100px;
+    height: auto;
 }
 
 .search-bar {
@@ -68,7 +70,6 @@ img {
     padding: 10px;
 }
 
-
 .error {
     color: red;
     margin-top: 10px;
@@ -76,7 +77,7 @@ img {
 
 .empty-pack-msg {
     color: red;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .loading {
@@ -107,6 +108,7 @@ img {
     color: white;
     border: none;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .pack-btn:hover {
@@ -150,7 +152,6 @@ img {
 .packing-table th {
     background-color: #eee;
     color: black;
-    /* Override base th */
     border-color: #ccc;
 }
 
@@ -166,21 +167,14 @@ img {
     padding: 5px;
 }
 
-.max-qty-header-input {
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
-    border: 1px solid #ccc;
-    padding: 4%;
-}
-
+.max-qty-header-input,
 .weight-header-input {
     width: 100%;
     box-sizing: border-box;
     text-align: center;
     border: 1px solid #ccc;
     padding: 4%;
-
+    font-size: 14px;
 }
 
 .transparent-input {
@@ -191,6 +185,7 @@ img {
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
+    padding: 0;
 }
 
 .transparent-input:focus {
@@ -212,6 +207,8 @@ img {
 
 .global-settings h3 {
     margin-top: 0;
+    font-size: 16px;
+    margin-bottom: 15px;
 }
 
 .global-sizes-container {
@@ -235,6 +232,7 @@ img {
     display: block;
     margin-bottom: 8px;
     color: #003366;
+    font-size: 14px;
 }
 
 .global-size-block .input-group {
@@ -250,6 +248,7 @@ img {
     width: 100%;
     box-sizing: border-box;
     padding: 3px;
+    font-size: 12px;
 }
 
 .global-apply-block {
@@ -263,4 +262,133 @@ img {
     margin: 20px auto;
     padding: 12px 24px;
     font-size: 16px;
+}
+
+.view-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 20px;
+}
+
+.nav-btn {
+    padding: 8px 12px;
+    border: 1px solid #003366;
+    background: white;
+    color: #003366;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.nav-btn.active-view {
+    background: #003366;
+    color: white;
+}
+
+.nav-input {
+    width: 50px;
+    padding: 8px;
+    border: 1px solid #003366;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.page-btn {
+    padding: 8px 15px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: white;
+    font-size: 14px;
+}
+
+.page-btn.active-page {
+    background: #003366;
+    color: white;
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   NEW GRID LAYOUT: Miniaturized Tables ONLY on Summary Page 
+   ========================================================= */
+
+.summary-view-container {
+    display: grid;
+    /* Forces a 2-column grid by default */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+/* Break into a 3x3 grid if the screen is large enough */
+@media (min-width: 1400px) {
+    .summary-view-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.summary-view-container .line-agg-section {
+    margin-bottom: 0;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-view-container .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: #f4f4f4;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.summary-view-container .summary-header h3 {
+    margin: 0;
+    color: #003366;
+    font-size: 13px;
+    /* Scaled down header */
+}
+
+/* Shrink table text to fit in grid */
+.summary-view-container table {
+    font-size: 11px;
+}
+
+/* Tighten the padding drastically */
+.summary-view-container th,
+.summary-view-container td {
+    padding: 3px 4px;
+}
+
+/* Shrink inputs inside the summary grid */
+.summary-view-container .max-qty-header-input,
+.summary-view-container .weight-header-input {
+    padding: 2px;
+    font-size: 11px;
+}
+
+/* Shrink the "Go to Table" button so it fits gracefully */
+.summary-view-container .nav-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+/* If a packing table has too many sizes, allow it to scroll horizontally inside its cell without breaking the grid */
+.summary-view-container .packing-container {
+    overflow-x: auto;
+    max-width: 100%;
 }
