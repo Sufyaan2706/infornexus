@@ -1,6 +1,7 @@
 import { fetchUidByPoNumber, fetchOrderData } from './api.js';
 import { renderTables } from './ui.js';
 import { escapeHTML } from './utils.js';
+import '../styles.css';
 
 const searchType = document.getElementById('searchType');
 const searchInput = document.getElementById('searchInput');

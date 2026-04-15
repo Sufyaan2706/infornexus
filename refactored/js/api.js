@@ -23,14 +23,27 @@ export async function fetchUidByPoNumber(poNumber) {
     if (!response.ok) throw new Error(`HTTP error during UID lookup: ${response.status}`);
 
     const rawResult = await response.json();
-    if (!Array.isArray(rawResult) || rawResult.length <= 4) throw new Error("Proxy returned unexpected data structure.");
+    if (!Array.isArray(rawResult)) throw new Error("Proxy returned unexpected data structure.");
 
-    const decodedString = decodeEscapes(rawResult[4]);
-    const queryData = JSON.parse(decodedString);
+    let queryData = null;
 
-    if (!queryData.result || queryData.result.length === 0) {
+    for (const item of rawResult) {
+        if (typeof item === 'string') {
+            try {
+                const parsed = JSON.parse(decodeEscapes(item));
+                if (parsed && parsed.result) {
+                    queryData = parsed;
+                    break;
+                }
+            } catch (e) {
+            }
+        }
+    }
+
+    if (!queryData || !queryData.result || queryData.result.length === 0) {
         throw new Error("No orders found matching this PO Number.");
     }
+
     return queryData.result.map(order => order.orderUid);
 }
 
@@ -48,17 +61,35 @@ export async function fetchOrderData(orderId) {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const rawResult = await response.json();
-    if (!Array.isArray(rawResult) || rawResult.length <= 4) {
+    if (!Array.isArray(rawResult)) {
         throw new Error("Proxy API returned an unexpected or empty data structure.");
     }
 
-    const payloadString = rawResult[4];
-    if (!payloadString) throw new Error("Payload at index 4 is missing.");
+    let orderData = null;
 
-    try {
-        const decodedString = decodeEscapes(payloadString);
-        return JSON.parse(decodedString);
-    } catch (parseError) {
-        throw new Error("Failed to parse the decoded JSON string.");
+    // Dynamically search the proxy array for the object containing the 'orderItem' property
+    for (const item of rawResult) {
+        if (typeof item === 'string') {
+            try {
+                const parsed = JSON.parse(decodeEscapes(item));
+                if (parsed && parsed.orderItem) {
+                    orderData = parsed;
+                    break;
+                }
+            } catch (parseError) {
+                // Ignore elements that cannot be parsed as valid JSON
+            }
+        } else if (item && typeof item === 'object') {
+            if (item.orderItem) {
+                orderData = item;
+                break;
+            }
+        }
     }
+
+    if (!orderData) {
+        throw new Error("Could not find order payload containing 'orderItem' in the proxy response.");
+    }
+
+    return orderData;
 }
