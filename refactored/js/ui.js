@@ -408,12 +408,11 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
     });
 }
 
-/**
- * Generates and displays a modal with all changes made to packing settings.
- */
+// Generates and displays a modal with all changes made to packing settings.
+
 function showSummaryModal(container) {
     const data = [];
-    const defaultQty = 50; // Defined in global settings [cite: 9, 21]
+    const defaultQty = 50; // Defined in global settings 
     const defaultWeight = "0.0";
 
     // Select all unique sizes from the UI
