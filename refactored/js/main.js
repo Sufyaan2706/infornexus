@@ -1,5 +1,5 @@
 import { fetchUidByPoNumber, fetchOrderData } from './api.js';
-import { renderTables } from './ui.js';
+import { renderTables } from './ui.js'; // Assuming order UI logic is still here
 import { escapeHTML } from './utils.js';
 import '../styles.css';
 
@@ -54,4 +54,3 @@ searchInput.addEventListener('keypress', function (e) {
 });
 
 document.getElementById('searchBtn').addEventListener('click', searchData);
-

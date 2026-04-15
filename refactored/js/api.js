@@ -8,48 +8,7 @@ function getHeaders() {
     return headers;
 }
 
-export async function fetchUidByPoNumber(poNumber) {
-    const oqlQuery = `poNumber='${poNumber}'`;
-    const targetUrl = `${API_BASE_URL}/OrderDetail/query?oql=${encodeURIComponent(oqlQuery)}`;
-
-    const urlencoded = new URLSearchParams();
-    urlencoded.append("url", targetUrl);
-    urlencoded.append("request_method", "GET");
-    urlencoded.append("customer", CUSTOMER_ID);
-
-    const requestOptions = { method: "POST", headers: getHeaders(), body: urlencoded, redirect: "follow" };
-    const response = await fetch(PROXY_URL, requestOptions);
-
-    if (!response.ok) throw new Error(`HTTP error during UID lookup: ${response.status}`);
-
-    const rawResult = await response.json();
-    if (!Array.isArray(rawResult)) throw new Error("Proxy returned unexpected data structure.");
-
-    let queryData = null;
-
-    for (const item of rawResult) {
-        if (typeof item === 'string') {
-            try {
-                const parsed = JSON.parse(decodeEscapes(item));
-                if (parsed && parsed.result) {
-                    queryData = parsed;
-                    break;
-                }
-            } catch (e) {
-            }
-        }
-    }
-
-    if (!queryData || !queryData.result || queryData.result.length === 0) {
-        throw new Error("No orders found matching this PO Number.");
-    }
-
-    return queryData.result.map(order => order.orderUid);
-}
-
-export async function fetchOrderData(orderId) {
-    const targetUrl = `${API_BASE_URL}/OrderDetail/${encodeURIComponent(orderId)}`;
-
+export async function fetchFromProxy(targetUrl) {
     const urlencoded = new URLSearchParams();
     urlencoded.append("url", targetUrl);
     urlencoded.append("request_method", "GET");
@@ -59,37 +18,63 @@ export async function fetchOrderData(orderId) {
     const response = await fetch(PROXY_URL, requestOptions);
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return response.json();
+}
 
-    const rawResult = await response.json();
+export function extractPayload(rawResult, validateFn) {
     if (!Array.isArray(rawResult)) {
-        throw new Error("Proxy API returned an unexpected or empty data structure.");
+        throw new Error("Invalid response format: expected an array from the proxy.");
     }
 
-    let orderData = null;
-
-    // Dynamically search the proxy array for the object containing the 'orderItem' property
     for (const item of rawResult) {
+        let parsed = item;
         if (typeof item === 'string') {
             try {
-                const parsed = JSON.parse(decodeEscapes(item));
-                if (parsed && parsed.orderItem) {
-                    orderData = parsed;
-                    break;
-                }
-            } catch (parseError) {
-                // Ignore elements that cannot be parsed as valid JSON
+                parsed = JSON.parse(decodeEscapes(item));
+            } catch (e) {
+                continue;
             }
-        } else if (item && typeof item === 'object') {
-            if (item.orderItem) {
-                orderData = item;
-                break;
-            }
+        }
+
+        // If parsed is an object and meets our specific validation criteria, return it
+        if (parsed && typeof parsed === 'object' && validateFn(parsed)) {
+            return parsed;
         }
     }
 
-    if (!orderData) {
-        throw new Error("Could not find order payload containing 'orderItem' in the proxy response.");
+    throw new Error("Could not find the expected JSON payload in the proxy response.");
+}
+
+// ---------------------------------------------------------
+// EXPORTED API METHODS
+// ---------------------------------------------------------
+
+export async function fetchUidByPoNumber(poNumber) {
+    const oqlQuery = `poNumber='${poNumber}'`;
+    const targetUrl = `${API_BASE_URL}/OrderDetail/query?oql=${encodeURIComponent(oqlQuery)}`;
+
+    const rawResult = await fetchFromProxy(targetUrl);
+
+    // We expect the payload to have a "result" property
+    const queryData = extractPayload(rawResult, data => data.result !== undefined);
+
+    if (!queryData.result || queryData.result.length === 0) {
+        throw new Error("No orders found matching this PO Number.");
     }
 
-    return orderData;
+    return queryData.result.map(order => order.orderUid);
+}
+
+export async function fetchOrderData(orderId) {
+    const targetUrl = `${API_BASE_URL}/OrderDetail/${encodeURIComponent(orderId)}`;
+
+    const rawResult = await fetchFromProxy(targetUrl);
+
+    // We expect the payload to have an "orderItem" property
+    return extractPayload(rawResult, data => data.orderItem !== undefined);
+}
+
+export function extractCatalogPayload(rawResult) {
+    // For catalog, we expect a "result" property that is an Array
+    return extractPayload(rawResult, data => data.result && Array.isArray(data.result));
 }
