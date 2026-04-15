@@ -29,6 +29,7 @@ export function renderCatalogUI(catalogItems, containerElement) {
         const attributes = item.itemAttribute || {};
         const size = escapeHTML(attributes.ManufacturingSize);
         const buyerNumber = escapeHTML(attributes.buyerItemNumber);
+        
         const netWeight = escapeHTML(attributes['measurements/netWeight']);
         const weightUnit = escapeHTML(attributes['measurements/weightUnit'] || 'KG');
 
