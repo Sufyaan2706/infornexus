@@ -1,7 +1,6 @@
 import fs from 'fs';
 import { extractCatalogPayload } from './decodeScript.js';
 
-// Read your uploaded testing.json
 const rawFileContent = fs.readFileSync('/home/Raxxit/Data/projects/infor/infornexus/refactored/js/testing.json', 'utf-8');
 const rawResultArray = JSON.parse(rawFileContent);
 

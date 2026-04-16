@@ -476,7 +476,6 @@ function renderPackingTable(items, maxQtyMap, weightMap, container, lineAgg) {
     html += `</tbody></table>`;
     container.innerHTML = html;
 
-    // Attach Event Listeners to inputs to trigger table redraws and update persisted state
     container.querySelectorAll('.max-qty-header-input').forEach(input => {
         input.addEventListener('change', (e) => {
             const updatedSize = e.target.getAttribute('data-size');
