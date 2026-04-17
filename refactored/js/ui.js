@@ -28,7 +28,6 @@ export class AppState {
         this.itemsPerPage = 5;
         this.container = null;
         this.globalMaxMap = {};
-        this.globalWeightMap = {};
         this.sortedSizes = [];
     }
 
@@ -58,13 +57,12 @@ export class AppState {
 
     ensureConfig(lineAgg, items) {
         if (this.tableConfigs[lineAgg]) return;
-        const config = { maxQtyMap: {}, weightMap: {} };
+        const config = { maxQtyMap: {} };
 
         items.forEach(item => {
             const size = Utils.escapeHTML(item.size);
             if (item.qty > 0 && size !== '-') {
                 config.maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
-                config.weightMap[size] = this.globalWeightMap[size] ?? '';
             }
         });
         this.tableConfigs[lineAgg] = config;
@@ -78,7 +76,24 @@ export class UIController {
 
     render() {
         this.state.container.innerHTML = '';
-        if (this.state.currentView !== 'summary') this._renderSettings();
+
+        if (this.state.currentView !== 'summary') {
+            const topControlsWrap = Utils.el('div', {
+                className: 'top-controls-wrapper',
+                style: { display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '20px' }
+            });
+
+            this._renderSettings(topControlsWrap);
+
+            const valWrap = Utils.el('div', { className: 'global-validation-container', style: { flex: '1 1 40%', overflowX: 'auto' } });
+            topControlsWrap.appendChild(valWrap);
+
+            // Gather all items globally for the single validation table
+            const allItems = Object.values(this.state.groups).flat();
+            new ValidationUI().render(allItems, valWrap);
+
+            this.state.container.appendChild(topControlsWrap);
+        }
 
         const uid = Utils.escapeHTML(this.state.orderData.__metadata?.uid || 'Unknown');
         const wrapper = Utils.el('div', {
@@ -105,8 +120,8 @@ export class UIController {
         }
     }
 
-    _renderSettings() {
-        const wrap = Utils.el('div', { className: 'global-settings' });
+    _renderSettings(parentContainer) {
+        const wrap = Utils.el('div', { className: 'global-settings', style: { flex: '1 1 50%' } });
         wrap.appendChild(Utils.el('h3', { html: 'Default Settings Per Size' }));
 
         const grid = Utils.el('div', { className: 'global-sizes-container' });
@@ -119,10 +134,6 @@ export class UIController {
                         Max Qty:<br>
                         <input type="number" class="global-max-qty" data-size="${size}" value="${this.state.globalMaxMap[size] || 50}" min="1">
                     </div>
-                    <div class="input-group">
-                        Weight:<br>
-                        <input type="number" class="global-weight" data-size="${size}" step="0.1" value="${this.state.globalWeightMap[size] || ''}">
-                    </div>
                 `
             }));
         });
@@ -130,14 +141,13 @@ export class UIController {
         const applyBtn = Utils.el('button', { className: 'pack-btn', html: 'Apply Defaults' });
         applyBtn.onclick = () => {
             document.querySelectorAll('.global-max-qty').forEach(i => this.state.globalMaxMap[i.dataset.size] = parseInt(i.value, 10));
-            document.querySelectorAll('.global-weight').forEach(i => this.state.globalWeightMap[i.dataset.size] = i.value);
             (this.state.currentView === 'all' ? this.state.lineAggKeys : this.state.paginatedKeys)
                 .forEach(k => delete this.state.tableConfigs[k]);
             this.render();
         };
 
         wrap.append(grid, Utils.el('div', { className: 'global-apply-block' }).appendChild(applyBtn).parentNode);
-        this.state.container.appendChild(wrap);
+        parentContainer.appendChild(wrap);
     }
 
     _renderSummary(wrapper) {
@@ -177,10 +187,6 @@ export class UIController {
             const packWrap = Utils.el('div', { className: 'packing-container', id: `packing-${agg.replace(/\W/g, '_')}` });
             new PackingUI(this.state, items, packWrap, agg).build();
             tables.appendChild(packWrap);
-
-            const valWrap = Utils.el('div', { className: 'validation-container' });
-            tables.appendChild(valWrap);
-            new ValidationUI().render(items, valWrap);
 
             section.appendChild(tables);
             wrapper.appendChild(section);
@@ -237,7 +243,7 @@ export class PackingUI {
     }
 
     render() {
-        const { maxQtyMap, weightMap } = this.state.tableConfigs[this.lineAgg];
+        const { maxQtyMap } = this.state.tableConfigs[this.lineAgg];
         const { sizes, batches } = this._getBatches();
 
         if (!batches.length) {
@@ -245,7 +251,7 @@ export class PackingUI {
             return;
         }
 
-        this.container.innerHTML = this._getHTML(sizes, batches, maxQtyMap, weightMap);
+        this.container.innerHTML = this._getHTML(sizes, batches, maxQtyMap);
         this._attachListeners();
     }
 
@@ -264,7 +270,7 @@ export class PackingUI {
         return { sizes: Array.from(unique).sort(Utils.compareSizes), batches };
     }
 
-    _getHTML(sizes, batches, maxQtyMap, weightMap) {
+    _getHTML(sizes, batches, maxQtyMap) {
         let rows = '', cartonNo = 1;
 
         batches.forEach(batch => {
@@ -297,7 +303,6 @@ export class PackingUI {
                     <tr><th rowspan="2">CTN NO</th><th colspan="${sizes.length}">SIZE</th><th rowspan="2">TOTAL CTNS</th><th rowspan="2">SHIPMENT QNTY</th></tr>
                     <tr>${sizes.map(s => `<th>${s}</th>`).join('')}</tr>
                     <tr><td>Max qty/box:</td>${sizes.map(s => `<td><input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" min="1"></td>`).join('')}<td colspan="2"></td></tr>
-                    <tr><td>Weight:</td>${sizes.map(s => `<td><input type="number" class="weight-header-input" data-size="${s}" value="${weightMap[s] || ''}"></td>`).join('')}<td colspan="2"></td></tr>
                 </thead>
                 <tbody>${rows}</tbody>
             </table>
@@ -312,9 +317,6 @@ export class PackingUI {
                 this.render();
             }
         }));
-        this.container.querySelectorAll('.weight-header-input').forEach(i => i.addEventListener('input', e => {
-            this.state.tableConfigs[this.lineAgg].weightMap[e.target.dataset.size] = e.target.value;
-        }));
     }
 }
 
@@ -324,32 +326,43 @@ export class ValidationUI {
         const catalog = await ApiClient.fetchBulkCatalog();
         const buyers = [...new Set(items.map(i => i.buyerNumber).filter(Boolean))];
 
+        // Grab the common Buyer Number for the header
+        const mainBuyerNumber = buyers.length > 0 ? buyers[0] : 'Unknown';
+
         let rows = '';
         buyers.forEach(bNum => {
             const reqSizes = [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))];
             const found = catalog.result?.filter(c => c.itemAttribute?.buyerItemNumber === bNum) || [];
 
             if (!found.length) {
-                rows += `<tr><td class="error-text">${bNum}</td><td colspan="2" class="error-text">Not found</td></tr>`;
+                rows += `<tr class="error-text"><td colspan="2">No data found for Buyer ${Utils.escapeHTML(bNum)}</td></tr>`;
                 return;
             }
 
-            const availSizes = found.map(c => c.itemAttribute?.ManufacturingSize).filter(Boolean);
             reqSizes.forEach(size => {
-                const ok = availSizes.includes(size);
-                rows += `<tr><td><strong>${bNum}</strong></td><td>${size}</td><td class="${ok ? 'success-text' : 'error-text'}">${ok ? 'Verified' : 'Missing'}</td></tr>`;
+                const catalogItem = found.find(c => c.itemAttribute?.ManufacturingSize === size);
+                const ok = !!catalogItem;
+
+                // Pull value, defaulting to empty string if missing so the input field remains clean
+                const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
+
+                // Apply color class to the whole row
+                rows += `<tr class="${ok ? 'success-text' : 'error-text'}">
+                    <td>${Utils.escapeHTML(size)}</td>
+                    <td><input type="number" step="0.01" class="val-weight-input" value="${Utils.escapeHTML(netWeight)}" placeholder="Weight"></td>
+                </tr>`;
             });
         });
 
-        container.innerHTML = `<h4>Catalog Verification</h4>
+        container.innerHTML = `<h4>Catalog Verification (Buyer No: ${Utils.escapeHTML(mainBuyerNumber)})</h4>
         <table class="validation-table">
-        <thead>
-        <tr>
-        <th>Buyer No.</th>
-        <th>Required Mfg Size</th>
-        <th>Status</th>
-        </tr>
-        </thead>
-        <tbody>${rows}</tbody></table>`;
+            <thead>
+                <tr>
+                    <th>Listed Size</th>
+                    <th>Net Weight</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>`;
     }
 }

@@ -280,7 +280,7 @@ th {
     flex-wrap: wrap;
     gap: 12px;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-evenly;
 }
 
 .global-size-block {
@@ -377,6 +377,7 @@ th {
     align-items: center;
     gap: 10px;
     margin-left: 20px;
+    margin-bottom: 10px;
 }
 
 /* ─── Pagination ─────────────────────────────────────────────────────────────── */
@@ -417,7 +418,7 @@ th {
 
 @media (min-width: 1400px) {
     .summary-view-container {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
