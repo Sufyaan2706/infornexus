@@ -1,28 +1,23 @@
-import { escapeHTML, compareSizes } from './utils.js';
-import { extractOrderDataToJson } from './export.js';
-import { fetchBulkCatalog, filterCatalogByBuyerNumber } from './api.js';
+import { Utils } from './utils.js';
+import { OrderExporter } from './export.js';
+import { ApiClient } from './api.js';
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+export class OrderItem {
+    constructor(item) {
+        this.bi = item.baseItem || {};
+        this.ref = this.bi.reference || {};
+        this.id = this.bi.itemIdentifier || {};
+        this.vr = this.bi.itemVariance || {};
 
-function el(tag, { className, html, style } = {}) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (html !== undefined) node.innerHTML = html;
-    if (style) Object.assign(node.style, style);
-    return node;
+        this.size = this.id.IdBuyerSize;
+        this.lineAgg = this.ref.LineAggregator ?? 'Unknown';
+        this.qty = parseFloat(this.bi.quantity || 0);
+        this.buyerNumber = this.id.BuyerNumber;
+        this.mfgSize = this.ref.ManufacturingSize;
+    }
 }
 
-function resolveItem(item) {
-    const bi = item.baseItem || {};
-    const ref = bi.reference || {};
-    const id = bi.itemIdentifier || {};
-    const vr = bi.itemVariance || {};
-    return { bi, ref, id, vr };
-}
-
-// ─── AppState ────────────────────────────────────────────────────────────────
-
-class AppState {
+export class AppState {
     constructor() {
         this.orderData = null;
         this.groups = {};
@@ -31,30 +26,27 @@ class AppState {
         this.currentView = 'paginated';
         this.currentPage = 1;
         this.itemsPerPage = 5;
-        this.containerElement = null;
+        this.container = null;
         this.globalMaxMap = {};
         this.globalWeightMap = {};
-        this.sortedGlobalSizes = [];
+        this.sortedSizes = [];
     }
 
-    load(orderData, containerElement) {
+    load(orderData, container) {
         this.orderData = orderData;
-        this.containerElement = containerElement;
+        this.container = container;
         this.groups = {};
         this.tableConfigs = {};
 
-        const allSizes = new Set();
-
-        orderData.orderItem.forEach(item => {
-            const { ref, id } = resolveItem(item);
-            const key = ref.LineAggregator ?? 'Unknown';
-            (this.groups[key] ??= []).push(item);
-            const size = id.IdBuyerSize;
-            if (size && size !== '-') allSizes.add(escapeHTML(size));
+        const sizes = new Set();
+        orderData.orderItem.forEach(rawItem => {
+            const item = new OrderItem(rawItem);
+            (this.groups[item.lineAgg] ??= []).push(item);
+            if (item.size && item.size !== '-') sizes.add(Utils.escapeHTML(item.size));
         });
 
         this.lineAggKeys = Object.keys(this.groups);
-        this.sortedGlobalSizes = Array.from(allSizes).sort(compareSizes);
+        this.sortedSizes = Array.from(sizes).sort(Utils.compareSizes);
     }
 
     get paginatedKeys() {
@@ -62,384 +54,239 @@ class AppState {
         return this.lineAggKeys.slice(start, start + this.itemsPerPage);
     }
 
-    get totalPages() {
-        return Math.ceil(this.lineAggKeys.length / this.itemsPerPage);
-    }
+    get totalPages() { return Math.ceil(this.lineAggKeys.length / this.itemsPerPage); }
 
-    ensureTableConfig(lineAgg, items) {
+    ensureConfig(lineAgg, items) {
         if (this.tableConfigs[lineAgg]) return;
-
-        const maxQtyMap = {};
-        const weightMap = {};
+        const config = { maxQtyMap: {}, weightMap: {} };
 
         items.forEach(item => {
-            const { bi, id } = resolveItem(item);
-            const size = escapeHTML(id.IdBuyerSize);
-            const qty = parseInt(bi.quantity, 10);
-            if (!isNaN(qty) && qty > 0 && size !== '-') {
-                maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
-                weightMap[size] = this.globalWeightMap[size] ?? '';
+            const size = Utils.escapeHTML(item.size);
+            if (item.qty > 0 && size !== '-') {
+                config.maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
+                config.weightMap[size] = this.globalWeightMap[size] ?? '';
             }
         });
-
-        this.tableConfigs[lineAgg] = { maxQtyMap, weightMap };
+        this.tableConfigs[lineAgg] = config;
     }
 }
 
-const state = new AppState();
-
-// ─── NavigationController ────────────────────────────────────────────────────
-
-class NavigationController {
-    constructor() {
-        this.viewControls = document.getElementById('viewControls');
-        this.btns = {
-            summary: document.getElementById('viewSummaryBtn'),
-            paginated: document.getElementById('viewPaginatedBtn'),
-            all: document.getElementById('viewAllBtn'),
-        };
+export class UIController {
+    constructor(state) {
+        this.state = state;
     }
 
-    setup() {
-        if (this.viewControls) this.viewControls.style.display = 'inline-flex';
+    render() {
+        this.state.container.innerHTML = '';
+        if (this.state.currentView !== 'summary') this._renderSettings();
 
-        const setView = (name, resetPage = false) => {
-            state.currentView = name;
-            if (resetPage) state.currentPage = 1;
-            this._highlightBtn(name);
-            renderCurrentView();
-        };
+        const uid = Utils.escapeHTML(this.state.orderData.__metadata?.uid || 'Unknown');
+        const wrapper = Utils.el('div', {
+            className: 'order-section',
+            html: `<h2>Order Details (UID: <span class="uid-text">${uid}</span>)</h2>`
+        });
+        this.state.container.appendChild(wrapper);
 
-        this.btns.summary.onclick = () => setView('summary');
-        this.btns.paginated.onclick = () => setView('paginated', true);
-        this.btns.all.onclick = () => setView('all');
-
-        this._syncItemsPerPageInput();
-    }
-
-    _highlightBtn(activeView) {
-        Object.entries(this.btns).forEach(([name, btn]) =>
-            btn.classList.toggle('active-view', name === activeView)
-        );
-    }
-
-    _syncItemsPerPageInput() {
-        const input = document.getElementById('itemsPerPage');
-        if (!input) return;
-
-        const parsed = parseInt(input.value, 10);
-        if (!isNaN(parsed) && parsed > 0) state.itemsPerPage = parsed;
-
-        input.oninput = e => {
-            const val = parseInt(e.target.value, 10);
-            if (val > 0) {
-                state.itemsPerPage = val;
-                state.currentPage = 1;
-                if (state.currentView === 'paginated') renderCurrentView();
+        const viewRenderers = {
+            summary: () => this._renderSummary(wrapper),
+            all: () => this._renderAggregators(this.state.lineAggKeys, wrapper),
+            paginated: () => {
+                this._renderAggregators(this.state.paginatedKeys, wrapper);
+                this._renderPagination(wrapper);
             }
         };
+        viewRenderers[this.state.currentView]();
 
-        input.onchange = e => {
-            const val = parseInt(e.target.value, 10);
-            if (isNaN(val) || val <= 0) e.target.value = state.itemsPerPage;
-        };
+        const onLastPage = this.state.currentPage === this.state.totalPages || this.state.totalPages === 0;
+        if (this.state.currentView === 'all' || (this.state.currentView === 'paginated' && onLastPage)) {
+            const btn = Utils.el('button', { className: 'pack-btn global-export-btn', html: 'Export All to JSON' });
+            btn.onclick = () => OrderExporter.extractToJson(this.state.orderData);
+            this.state.container.appendChild(btn);
+        }
     }
-}
 
-// ─── Renderers ───────────────────────────────────────────────────────────────
+    _renderSettings() {
+        const wrap = Utils.el('div', { className: 'global-settings' });
+        wrap.appendChild(Utils.el('h3', { html: 'Default Settings Per Size' }));
 
-class GlobalSettingsRenderer {
-    render() {
-        const wrap = el('div', { className: 'global-settings' });
-        wrap.appendChild(el('h3', { html: 'Default Settings Per Size' }));
-
-        const grid = el('div', { className: 'global-sizes-container' });
-
-        state.sortedGlobalSizes.forEach(size => {
-            grid.appendChild(el('div', {
+        const grid = Utils.el('div', { className: 'global-sizes-container' });
+        this.state.sortedSizes.forEach(size => {
+            grid.appendChild(Utils.el('div', {
                 className: 'global-size-block',
                 html: `
                     <strong>${size}</strong>
                     <div class="input-group input-group-margin">
                         Max Qty:<br>
-                        <input type="number" class="global-max-qty" data-size="${size}"
-                            value="${state.globalMaxMap[size] || 50}" min="1">
+                        <input type="number" class="global-max-qty" data-size="${size}" value="${this.state.globalMaxMap[size] || 50}" min="1">
                     </div>
                     <div class="input-group">
                         Weight:<br>
-                        <input type="number" class="global-weight" data-size="${size}"
-                            step="0.1" min="0" placeholder="0.0"
-                            value="${state.globalWeightMap[size] || ''}">
+                        <input type="number" class="global-weight" data-size="${size}" step="0.1" value="${this.state.globalWeightMap[size] || ''}">
                     </div>
-                `,
+                `
             }));
         });
 
-        const applyBtn = el('button', { className: 'pack-btn', html: 'Apply Defaults to Displayed Tables' });
-        applyBtn.onclick = () => this._applyDefaults();
+        const applyBtn = Utils.el('button', { className: 'pack-btn', html: 'Apply Defaults' });
+        applyBtn.onclick = () => {
+            document.querySelectorAll('.global-max-qty').forEach(i => this.state.globalMaxMap[i.dataset.size] = parseInt(i.value, 10));
+            document.querySelectorAll('.global-weight').forEach(i => this.state.globalWeightMap[i.dataset.size] = i.value);
+            (this.state.currentView === 'all' ? this.state.lineAggKeys : this.state.paginatedKeys)
+                .forEach(k => delete this.state.tableConfigs[k]);
+            this.render();
+        };
 
-        const applyBlock = el('div', { className: 'global-apply-block' });
-        applyBlock.appendChild(applyBtn);
-
-        wrap.appendChild(grid);
-        wrap.appendChild(applyBlock);
-        state.containerElement.appendChild(wrap);
+        wrap.append(grid, Utils.el('div', { className: 'global-apply-block' }).appendChild(applyBtn).parentNode);
+        this.state.container.appendChild(wrap);
     }
 
-    _applyDefaults() {
-        document.querySelectorAll('.global-max-qty').forEach(input =>
-            state.globalMaxMap[input.dataset.size] = parseInt(input.value, 10)
-        );
-        document.querySelectorAll('.global-weight').forEach(input =>
-            state.globalWeightMap[input.dataset.size] = input.value
-        );
+    _renderSummary(wrapper) {
+        const container = Utils.el('div', { className: 'summary-view-container' });
+        this.state.lineAggKeys.forEach((agg, index) => {
+            const items = this.state.groups[agg];
+            const section = Utils.el('div', { className: 'line-agg-section' });
 
-        const keysToReset = state.currentView === 'all'
-            ? state.lineAggKeys
-            : state.paginatedKeys;
+            const btn = Utils.el('button', { className: 'nav-btn', html: 'Go to Editor' });
+            btn.onclick = () => {
+                this.state.currentView = 'paginated';
+                this.state.currentPage = Math.ceil((index + 1) / this.state.itemsPerPage);
+                this.render();
+            };
 
-        keysToReset.forEach(key => delete state.tableConfigs[key]);
-        renderCurrentView();
-    }
-}
+            const header = Utils.el('div', { className: 'summary-header', html: `<h3>Line Aggregator: ${Utils.escapeHTML(agg)}</h3>` });
+            header.appendChild(btn);
 
-class SummaryRenderer {
-    render(wrapper) {
-        const container = el('div', { className: 'summary-view-container' });
+            const packWrap = Utils.el('div', { className: 'packing-container', style: { overflowX: 'auto' } });
+            new PackingUI(this.state, items, packWrap, agg).build();
 
-        state.lineAggKeys.forEach((lineAgg, index) => {
-            const items = state.groups[lineAgg];
-            const totalQty = items.reduce((s, i) => s + parseFloat(i.baseItem?.quantity || 0), 0);
-
-            const section = el('div', { className: 'line-agg-section' });
-            const header = el('div', {
-                className: 'summary-header',
-                html: `<h3>Line Aggregator: ${escapeHTML(lineAgg)} (Total Qty: ${totalQty})</h3>`
-            });
-
-            const gotoBtn = el('button', { className: 'nav-btn', html: 'Go to Editor Page' });
-            gotoBtn.onclick = () => this._navigateTo(lineAgg, index);
-
-            header.appendChild(gotoBtn);
-            section.appendChild(header);
-
-            const packWrap = el('div', { className: 'packing-container', style: { overflowX: 'auto' } });
-            new PackingUIBuilder(items, packWrap, lineAgg).build();
-
-            section.appendChild(packWrap);
+            section.append(header, packWrap);
             container.appendChild(section);
         });
-
         wrapper.appendChild(container);
     }
 
-    _navigateTo(lineAgg, index) {
-        state.currentView = 'paginated';
-        state.currentPage = Math.ceil((index + 1) / state.itemsPerPage);
+    _renderAggregators(keys, wrapper) {
+        keys.forEach(agg => {
+            const items = this.state.groups[agg];
+            const section = Utils.el('div', { className: 'line-agg-section' });
+            section.appendChild(Utils.el('h3', { html: `Line Aggregator: ${Utils.escapeHTML(agg)}` }));
 
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-view'));
-        document.getElementById('viewPaginatedBtn')?.classList.add('active-view');
+            const tables = Utils.el('div', { className: 'tables-container' });
+            tables.appendChild(this._buildDataTable(items));
 
-        renderCurrentView();
+            const packWrap = Utils.el('div', { className: 'packing-container', id: `packing-${agg.replace(/\W/g, '_')}` });
+            new PackingUI(this.state, items, packWrap, agg).build();
+            tables.appendChild(packWrap);
 
-        setTimeout(() => {
-            for (const h of document.querySelectorAll('.line-agg-section h3')) {
-                if (h.innerText.includes(lineAgg)) {
-                    h.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    break;
-                }
-            }
-        }, 50);
-    }
-}
+            const valWrap = Utils.el('div', { className: 'validation-container' });
+            tables.appendChild(valWrap);
+            new ValidationUI().render(items, valWrap);
 
-class AggregatorRenderer {
-    render(aggKeys, wrapper) {
-        aggKeys.forEach(lineAgg => {
-            const items = state.groups[lineAgg];
-
-            const section = el('div', { className: 'line-agg-section' });
-            section.appendChild(el('h3', { html: `Line Aggregator: ${escapeHTML(lineAgg)}` }));
-
-            // Single flex row — all three panels sit side-by-side as direct children
-            const tablesContainer = el('div', { className: 'tables-container' });
-
-            // Panel 1: original data table
-            tablesContainer.appendChild(this._buildDataTable(items));
-
-            // Panel 2: packing table
-            const packWrap = el('div', { className: 'packing-container' });
-            new PackingUIBuilder(items, packWrap, lineAgg).build();
-            tablesContainer.appendChild(packWrap);
-
-            // Panel 3: validation table (async, appends itself into tablesContainer)
-            const validationWrap = el('div', { className: 'validation-container' });
-            tablesContainer.appendChild(validationWrap);
-            renderValidationTable(state.groups[lineAgg], validationWrap);
-
-            section.appendChild(tablesContainer);
+            section.appendChild(tables);
             wrapper.appendChild(section);
         });
     }
 
     _buildDataTable(items) {
-        const wrapper = el('div', { className: 'original-table-wrapper' });
-        const table = el('table');
+        const wrapper = Utils.el('div', { className: 'original-table-wrapper' });
+        const rows = items.map(i => `
+            <tr>
+                <td>${Utils.escapeHTML(i.size)}</td>
+                <td>${Utils.escapeHTML(i.id.ItemSequenceNumber)}</td>
+                <td>${Utils.escapeHTML(i.ref.AdidasShipMode)}</td>
+                <td>${Utils.escapeHTML(i.ref.ItemStatus)}</td>
+                <td>${Utils.escapeHTML(i.qty)}</td>
+                <td>${Utils.escapeHTML(i.mfgSize)}</td>
+                <td>${Utils.escapeHTML(i.vr.upperVariance)}</td>
+                <td>${Utils.escapeHTML(i.vr.lowerVariance)}</td>
+            </tr>
+        `).join('');
 
-        let totalQty = 0;
-        let rows = '';
-
-        items.forEach(item => {
-            const { bi, ref, id, vr } = resolveItem(item);
-            const qty = parseFloat(bi.quantity || 0);
-            totalQty += qty;
-
-            rows += `
-                <tr>
-                    <td><span class="size">${escapeHTML(id.IdBuyerSize)}</span></td>
-                    <td><span class="description">${escapeHTML(id.ItemSequenceNumber)}</span></td>
-                    <td><span class="brand">${escapeHTML(ref.AdidasShipMode)}</span></td>
-                    <td><span class="status">${escapeHTML(ref.ItemStatus)}</span></td>
-                    <td><span class="qty">${escapeHTML(bi.quantity)}</span></td>
-                    <td><span class="qty">${escapeHTML(ref.ManufacturingSize)}</span></td>
-                    <td><span class="qty">${escapeHTML(vr.upperVariance)}</span></td>
-                    <td><span class="qty">${escapeHTML(vr.lowerVariance)}</span></td>
-                </tr>
-            `;
-        });
-
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Size</th><th>Seq #</th><th>Ship Mode</th><th>Status</th>
-                    <th>Quantity</th><th>Manufacturing Size</th><th>Upper Var</th><th>Lower Var</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows}
-                <tr class="total-row">
-                    <td colspan="4"><strong class="bold-text">TOTAL QUANTITY</strong></td>
-                    <td><strong class="bold-text">${totalQty}</strong></td>
-                </tr>
-            </tbody>
-        `;
-
-        wrapper.appendChild(table);
+        wrapper.appendChild(Utils.el('table', {
+            html: `
+                <thead><tr><th>Size</th><th>Seq #</th><th>Ship Mode</th><th>Status</th><th>Qty</th><th>Mfg Size</th><th>Up Var</th><th>Low Var</th></tr></thead>
+                <tbody>${rows}<tr class="total-row"><td colspan="4"><strong>TOTAL</strong></td><td><strong>${items.reduce((s, i) => s + i.qty, 0)}</strong></td></tr></tbody>
+            `
+        }));
         return wrapper;
     }
-}
 
-class PaginationRenderer {
-    render(wrapper) {
-        if (state.totalPages <= 1) return;
-
-        const controls = el('div', { className: 'pagination-controls' });
-
-        for (let i = 1; i <= state.totalPages; i++) {
-            const btn = el('button', {
-                className: `page-btn ${i === state.currentPage ? 'active-page' : ''}`,
-                html: String(i),
-            });
-            btn.onclick = () => {
-                state.currentPage = i;
-                renderCurrentView();
-                document.querySelector('.global-settings')
-                    ?.scrollIntoView({ behavior: 'smooth' });
-            };
+    _renderPagination(wrapper) {
+        if (this.state.totalPages <= 1) return;
+        const controls = Utils.el('div', { className: 'pagination-controls' });
+        for (let i = 1; i <= this.state.totalPages; i++) {
+            const btn = Utils.el('button', { className: `page-btn ${i === this.state.currentPage ? 'active-page' : ''}`, html: String(i) });
+            btn.onclick = () => { this.state.currentPage = i; this.render(); };
             controls.appendChild(btn);
         }
-
         wrapper.appendChild(controls);
     }
 }
 
-// ─── PackingUIBuilder ────────────────────────────────────────────────────────
-
-class PackingUIBuilder {
-    constructor(items, container, lineAgg) {
+export class PackingUI {
+    constructor(state, items, container, lineAgg) {
+        this.state = state;
         this.items = items;
         this.container = container;
         this.lineAgg = lineAgg;
     }
 
     build() {
-        state.ensureTableConfig(this.lineAgg, this.items);
-        const { maxQtyMap, weightMap } = state.tableConfigs[this.lineAgg];
-        this._render(maxQtyMap, weightMap);
+        this.state.ensureConfig(this.lineAgg, this.items);
+        this.render();
     }
 
-    _render(maxQtyMap, weightMap) {
-        const { sizes, batches } = this._computeBatches();
+    render() {
+        const { maxQtyMap, weightMap } = this.state.tableConfigs[this.lineAgg];
+        const { sizes, batches } = this._getBatches();
 
-        if (batches.length === 0) {
-            this.container.innerHTML = '<div class="empty-pack-msg">No valid items found to pack.</div>';
+        if (!batches.length) {
+            this.container.innerHTML = '<div class="empty-pack-msg">No valid items found.</div>';
             return;
         }
 
-        this.container.innerHTML = this._buildTableHTML(sizes, batches, maxQtyMap, weightMap);
-        this._attachInputListeners(sizes);
+        this.container.innerHTML = this._getHTML(sizes, batches, maxQtyMap, weightMap);
+        this._attachListeners();
     }
 
-    _computeBatches() {
-        const uniqueSizes = new Set();
+    _getBatches() {
+        const unique = new Set();
         const batches = [];
+        this.items.forEach(i => {
+            if (isNaN(i.qty) || i.qty <= 0 || i.size === '-') return;
+            const size = Utils.escapeHTML(i.size);
+            unique.add(size);
 
-        this.items.forEach(item => {
-            const { bi, id } = resolveItem(item);
-            const size = escapeHTML(id.IdBuyerSize);
-            const qty = parseInt(bi.quantity, 10);
-            const seqNo = escapeHTML(id.ItemSequenceNumber || '');
-
-            if (isNaN(qty) || qty <= 0 || size === '-') return;
-
-            uniqueSizes.add(size);
             const existing = batches.find(b => !b.some(x => x.size === size));
-            existing ? existing.push({ size, qty, seqNo }) : batches.push([{ size, qty, seqNo }]);
+            const data = { size, qty: i.qty, seqNo: Utils.escapeHTML(i.id.ItemSequenceNumber) };
+            existing ? existing.push(data) : batches.push([data]);
         });
-
-        const sizes = Array.from(uniqueSizes).sort(compareSizes);
-        return { sizes, batches };
+        return { sizes: Array.from(unique).sort(Utils.compareSizes), batches };
     }
 
-    _buildTableHTML(sizes, batches, maxQtyMap, weightMap) {
-        const sizeHeaders = sizes.map(s => `<th>${s}</th>`).join('');
-        const maxQtyInputs = sizes.map(s =>
-            `<td><input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" min="1"></td>`
-        ).join('');
-        const weightInputs = sizes.map(s =>
-            `<td><input type="number" class="weight-header-input" data-size="${s}" step="0.1" value="${weightMap[s] || ''}"></td>`
-        ).join('');
-
-        let rows = '';
-        let cartonNo = 1;
+    _getHTML(sizes, batches, maxQtyMap, weightMap) {
+        let rows = '', cartonNo = 1;
 
         batches.forEach(batch => {
-            batch.sort((a, b) => compareSizes(a.size, b.size));
+            batch.sort((a, b) => Utils.compareSizes(a.size, b.size)).forEach(({ size, qty, seqNo }) => {
+                const max = maxQtyMap[size];
+                if (!max || max <= 0) return;
 
-            batch.forEach(({ size, qty, seqNo }) => {
-                const maxQty = maxQtyMap[size];
-                if (!maxQty || maxQty <= 0) return;
+                const full = Math.floor(qty / max);
+                const rem = qty % max;
 
-                const full = Math.floor(qty / maxQty);
-                const remainder = qty % maxQty;
-
-                const makeRow = (ctnLabel, value, count, shipQty) => {
-                    const cells = sizes.map(s =>
-                        s === size
-                            ? `<td><input type="text" value="${value}" class="transparent-input" data-seq="${seqNo}" readonly></td>`
-                            : '<td></td>'
-                    ).join('');
-                    return `<tr><td class="bold-text">${ctnLabel}</td>${cells}<td class="highlight-cell">${count}</td><td class="highlight-cell">${shipQty}</td></tr>`;
+                const makeRow = (lbl, val, cnt) => {
+                    const cells = sizes.map(s => s === size ? `<td><input type="text" value="${val}" class="transparent-input" data-seq="${seqNo}" readonly></td>` : '<td></td>').join('');
+                    return `<tr><td><strong>${lbl}</strong></td>${cells}<td>${cnt}</td><td>${cnt * val}</td></tr>`;
                 };
 
                 if (full > 0) {
                     const end = cartonNo + full - 1;
-                    rows += makeRow(cartonNo === end ? `${cartonNo}` : `${cartonNo}-${end}`, maxQty, full, full * maxQty);
+                    rows += makeRow(cartonNo === end ? cartonNo : `${cartonNo}-${end}`, max, full);
                     cartonNo = end + 1;
                 }
-                if (remainder > 0) {
-                    rows += makeRow(`${cartonNo}`, remainder, 1, remainder);
-                    cartonNo++;
+                if (rem > 0) {
+                    rows += makeRow(cartonNo++, rem, 1);
                 }
             });
         });
@@ -447,160 +294,62 @@ class PackingUIBuilder {
         return `
             <table class="packing-table">
                 <thead>
-                    <tr>
-                        <th rowspan="2">CTN NO</th>
-                        <th colspan="${sizes.length}">SIZE</th>
-                        <th rowspan="2">TOTAL CTNS</th>
-                        <th rowspan="2">SHIPMENT QNTY</th>
-                    </tr>
-                    <tr>${sizeHeaders}</tr>
-                    <tr class="input-row">
-                        <td class="input-label">Max qty/box:</td>
-                        ${maxQtyInputs}
-                        <td colspan="2"></td>
-                    </tr>
-                    <tr class="input-row">
-                        <td class="input-label">Weight:</td>
-                        ${weightInputs}
-                        <td colspan="2"></td>
-                    </tr>
+                    <tr><th rowspan="2">CTN NO</th><th colspan="${sizes.length}">SIZE</th><th rowspan="2">TOTAL CTNS</th><th rowspan="2">SHIPMENT QNTY</th></tr>
+                    <tr>${sizes.map(s => `<th>${s}</th>`).join('')}</tr>
+                    <tr><td>Max qty/box:</td>${sizes.map(s => `<td><input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" min="1"></td>`).join('')}<td colspan="2"></td></tr>
+                    <tr><td>Weight:</td>${sizes.map(s => `<td><input type="number" class="weight-header-input" data-size="${s}" value="${weightMap[s] || ''}"></td>`).join('')}<td colspan="2"></td></tr>
                 </thead>
                 <tbody>${rows}</tbody>
             </table>
         `;
     }
 
-    _attachInputListeners(sizes) {
-        this.container.querySelectorAll('.max-qty-header-input').forEach(input => {
-            input.addEventListener('change', e => {
-                const val = parseInt(e.target.value, 10);
-                if (val > 0) {
-                    state.tableConfigs[this.lineAgg].maxQtyMap[e.target.dataset.size] = val;
-                    const { maxQtyMap, weightMap } = state.tableConfigs[this.lineAgg];
-                    this._render(maxQtyMap, weightMap);
-                }
-            });
-        });
-
-        this.container.querySelectorAll('.weight-header-input').forEach(input => {
-            input.addEventListener('input', e => {
-                state.tableConfigs[this.lineAgg].weightMap[e.target.dataset.size] = e.target.value;
-            });
-        });
+    _attachListeners() {
+        this.container.querySelectorAll('.max-qty-header-input').forEach(i => i.addEventListener('change', e => {
+            const val = parseInt(e.target.value, 10);
+            if (val > 0) {
+                this.state.tableConfigs[this.lineAgg].maxQtyMap[e.target.dataset.size] = val;
+                this.render();
+            }
+        }));
+        this.container.querySelectorAll('.weight-header-input').forEach(i => i.addEventListener('input', e => {
+            this.state.tableConfigs[this.lineAgg].weightMap[e.target.dataset.size] = e.target.value;
+        }));
     }
 }
 
-// ─── ValidationTable ─────────────────────────────────────────────────────────
+export class ValidationUI {
+    async render(items, container) {
+        container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Fetching...</div>';
+        const catalog = await ApiClient.fetchBulkCatalog();
+        const buyers = [...new Set(items.map(i => i.buyerNumber).filter(Boolean))];
 
-export async function renderValidationTable(orderItems, container) {
-    container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Fetching catalog data…</div>';
+        let rows = '';
+        buyers.forEach(bNum => {
+            const reqSizes = [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))];
+            const found = catalog.result?.filter(c => c.itemAttribute?.buyerItemNumber === bNum) || [];
 
-    // 1. Fetch the bulk data ONCE from the endpoint that works
-    const bulkCatalogData = await fetchBulkCatalog();
+            if (!found.length) {
+                rows += `<tr><td class="error-text">${bNum}</td><td colspan="2" class="error-text">Not found</td></tr>`;
+                return;
+            }
 
-    const uniqueBuyerNums = [...new Set(
-        orderItems.map(i => i.baseItem?.itemIdentifier?.BuyerNumber).filter(Boolean)
-    )];
-
-    let rows = '';
-
-    for (const bNum of uniqueBuyerNums) {
-        // Updated: Pulling ManufacturingSize instead of IdBuyerSize from the order item
-        const requiredSizes = [...new Set(
-            orderItems
-                .filter(i => i.baseItem.itemIdentifier.BuyerNumber === bNum)
-                .map(i => i.baseItem.reference.ManufacturingSize)
-        )];
-
-        // 2. Use your client-side filter here instead of an API call
-        const catalogItems = filterCatalogByBuyerNumber(bulkCatalogData, bNum);
-
-        if (catalogItems.length === 0) {
-            rows += `<tr>
-                <td class="error-text">${escapeHTML(bNum)}</td>
-                <td colspan="2" class="error-text">Buyer Number not found in catalog</td>
-            </tr>`;
-            continue;
-        }
-
-        // Updated: Strictly pulling ManufacturingSize from the catalog item
-        const availableSizes = catalogItems
-            .map(c => c.itemAttribute?.ManufacturingSize)
-            .filter(Boolean);
-
-        requiredSizes.forEach(size => {
-            const ok = availableSizes.includes(size);
-            rows += `<tr>
-                <td class="bold-text">${escapeHTML(bNum)}</td>
-                <td>${escapeHTML(size)}</td>
-                <td class="${ok ? 'success-text' : 'error-text'}">${ok ? ' Verified' : ' Size Missing'}</td>
-            </tr>`;
+            const availSizes = found.map(c => c.itemAttribute?.ManufacturingSize).filter(Boolean);
+            reqSizes.forEach(size => {
+                const ok = availSizes.includes(size);
+                rows += `<tr><td><strong>${bNum}</strong></td><td>${size}</td><td class="${ok ? 'success-text' : 'error-text'}">${ok ? 'Verified' : 'Missing'}</td></tr>`;
+            });
         });
-    }
 
-    container.innerHTML = `
-        <h4>Catalog Verification</h4>
+        container.innerHTML = `<h4>Catalog Verification</h4>
         <table class="validation-table">
-            <thead><tr><th>Buyer No.</th><th>Required Mfg Size</th><th>Catalog Status</th></tr></thead>
-            <tbody>${rows}</tbody>
-        </table>
-    `;
-}
-// ─── Public API ──────────────────────────────────────────────────────────────
-
-export function renderTables(orderData, containerElement) {
-    if (!orderData || !Array.isArray(orderData.orderItem)) {
-        containerElement.innerHTML += '<div class="error">No order items found.</div>';
-        return;
-    }
-
-    state.load(orderData, containerElement);
-    new NavigationController().setup();
-    renderCurrentView();
-}
-
-export function createPackingUI(items, container, globalMaxQtyMap = {}, globalWeightMap = {}, lineAgg = '') {
-    container.innerHTML = '';
-    // Merge caller-supplied globals into state before building
-    Object.assign(state.globalMaxMap, globalMaxQtyMap);
-    Object.assign(state.globalWeightMap, globalWeightMap);
-    new PackingUIBuilder(items, container, lineAgg).build();
-}
-
-// ─── Core render orchestrator ─────────────────────────────────────────────────
-
-function renderCurrentView() {
-    state.containerElement.innerHTML = '';
-
-    if (state.currentView !== 'summary') {
-        new GlobalSettingsRenderer().render();
-    }
-
-    const uid = escapeHTML(state.orderData.__metadata?.uid || 'Unknown');
-    const orderWrapper = el('div', {
-        className: 'order-section',
-        html: `<h2>Order Details (UID: <span class="uid-text">${uid}</span>)</h2>`
-    });
-    state.containerElement.appendChild(orderWrapper);
-
-    if (state.currentView === 'summary') {
-        new SummaryRenderer().render(orderWrapper);
-
-    } else if (state.currentView === 'all') {
-        new AggregatorRenderer().render(state.lineAggKeys, orderWrapper);
-
-    } else {
-        new AggregatorRenderer().render(state.paginatedKeys, orderWrapper);
-        new PaginationRenderer().render(orderWrapper);
-    }
-
-    // Export button: visible on "all" view, or on the last paginated page
-    const onLastPage = state.currentPage === state.totalPages || state.totalPages === 0;
-    const showExport = state.currentView === 'all' || (state.currentView === 'paginated' && onLastPage);
-
-    if (showExport) {
-        const exportBtn = el('button', { className: 'pack-btn global-export-btn', html: 'Export All to JSON' });
-        exportBtn.onclick = () => extractOrderDataToJson(state.orderData);
-        state.containerElement.appendChild(exportBtn);
+        <thead>
+        <tr>
+        <th>Buyer No.</th>
+        <th>Required Mfg Size</th>
+        <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>${rows}</tbody></table>`;
     }
 }
