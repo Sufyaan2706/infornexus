@@ -47,7 +47,7 @@
         "redirectUrl": "https://network.infornexus.com/en/trade/Order?key=358734816274",
         "self": "https://network.infornexus.com/rest/3.1.0/OrderDetail/358734816274"
       }
-    },
+    }
     {
       "subMessageId": "1",
       "poNumber": "0135456361",

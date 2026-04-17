@@ -79,16 +79,26 @@ export function extractCatalogPayload(rawResult) {
     return extractPayload(rawResult, data => data.result && Array.isArray(data.result));
 }
 
-export async function checkCatalogForItem(itemKeyOrBuyerNumber) {
-    // You can use 'contains' or '=' depending on how exact the match needs to be.
-    const oqlQuery = `itemKey contains '${itemKeyOrBuyerNumber}'`;
-    const targetUrl = `https://network.infornexus.com/rest/3.1.0/ProductCatalogItem/query?oql=${encodeURIComponent(oqlQuery)}`;
+
+export async function fetchBulkCatalog() {
+    const targetUrl = `https://network.infornexus.com/rest/3.1.0/ProductCatalogItem/adidasWeightsUnified5717989018343878/list`;
 
     try {
         const rawResult = await fetchFromProxy(targetUrl);
         return extractCatalogPayload(rawResult);
     } catch (e) {
-        console.warn(`Could not verify item: ${itemKeyOrBuyerNumber}`, e);
+        console.warn(`Could not fetch bulk catalog data`, e);
         return { result: [] };
     }
+}
+
+export function filterCatalogByBuyerNumber(apiResponse, expectedBuyerNumber) {
+    if (!apiResponse?.result || !Array.isArray(apiResponse.result)) {
+        return [];
+    }
+
+    return apiResponse.result.filter(item =>
+        item.itemAttribute &&
+        item.itemAttribute.buyerItemNumber === expectedBuyerNumber
+    );
 }

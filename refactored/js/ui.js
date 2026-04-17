@@ -1,10 +1,9 @@
 import { escapeHTML, compareSizes } from './utils.js';
 import { extractOrderDataToJson } from './export.js';
-import { checkCatalogForItem } from './api.js';
+import { fetchBulkCatalog, filterCatalogByBuyerNumber } from './api.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-/** Create a DOM element with optional className and innerHTML. */
 function el(tag, { className, html, style } = {}) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -13,7 +12,6 @@ function el(tag, { className, html, style } = {}) {
     return node;
 }
 
-/** Resolve baseItem sub-objects from an order item. */
 function resolveItem(item) {
     const bi = item.baseItem || {};
     const ref = bi.reference || {};
@@ -39,7 +37,6 @@ class AppState {
         this.sortedGlobalSizes = [];
     }
 
-    /** Populate groups & sizes from raw orderData. */
     load(orderData, containerElement) {
         this.orderData = orderData;
         this.containerElement = containerElement;
@@ -60,7 +57,6 @@ class AppState {
         this.sortedGlobalSizes = Array.from(allSizes).sort(compareSizes);
     }
 
-    /** Return the slice of lineAggKeys for the current paginated view. */
     get paginatedKeys() {
         const start = (this.currentPage - 1) * this.itemsPerPage;
         return this.lineAggKeys.slice(start, start + this.itemsPerPage);
@@ -70,7 +66,6 @@ class AppState {
         return Math.ceil(this.lineAggKeys.length / this.itemsPerPage);
     }
 
-    /** Ensure a tableConfig exists for lineAgg, seeded from global maps. */
     ensureTableConfig(lineAgg, items) {
         if (this.tableConfigs[lineAgg]) return;
 
@@ -307,7 +302,6 @@ class AggregatorRenderer {
                     <td><span class="status">${escapeHTML(ref.ItemStatus)}</span></td>
                     <td><span class="qty">${escapeHTML(bi.quantity)}</span></td>
                     <td><span class="qty">${escapeHTML(ref.ManufacturingSize)}</span></td>
-                    <td><span class="qty">${escapeHTML(item.itemKey)}</span></td>
                     <td><span class="qty">${escapeHTML(vr.upperVariance)}</span></td>
                     <td><span class="qty">${escapeHTML(vr.lowerVariance)}</span></td>
                 </tr>
@@ -499,8 +493,10 @@ class PackingUIBuilder {
 // ─── ValidationTable ─────────────────────────────────────────────────────────
 
 export async function renderValidationTable(orderItems, container) {
-    // Show a loading state immediately while the async fetch runs
-    container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Checking catalog…</div>';
+    container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Fetching catalog data…</div>';
+
+    // 1. Fetch the bulk data ONCE from the endpoint that works
+    const bulkCatalogData = await fetchBulkCatalog();
 
     const uniqueBuyerNums = [...new Set(
         orderItems.map(i => i.baseItem?.itemIdentifier?.BuyerNumber).filter(Boolean)
@@ -509,15 +505,15 @@ export async function renderValidationTable(orderItems, container) {
     let rows = '';
 
     for (const bNum of uniqueBuyerNums) {
+        // Updated: Pulling ManufacturingSize instead of IdBuyerSize from the order item
         const requiredSizes = [...new Set(
             orderItems
                 .filter(i => i.baseItem.itemIdentifier.BuyerNumber === bNum)
-                .map(i => i.baseItem.itemIdentifier.IdBuyerSize)
+                .map(i => i.baseItem.reference.ManufacturingSize)
         )];
 
-        const catalogData = await checkCatalogForItem('buyerItemNumber = ' + "'" + bNum + "'");
-        console.log(catalogData);
-        const catalogItems = catalogData?.result || [];
+        // 2. Use your client-side filter here instead of an API call
+        const catalogItems = filterCatalogByBuyerNumber(bulkCatalogData, bNum);
 
         if (catalogItems.length === 0) {
             rows += `<tr>
@@ -527,8 +523,9 @@ export async function renderValidationTable(orderItems, container) {
             continue;
         }
 
+        // Updated: Strictly pulling ManufacturingSize from the catalog item
         const availableSizes = catalogItems
-            .map(c => c.itemAttribute?.ManufacturingSize || c.itemAttribute?.IdBuyerSize)
+            .map(c => c.itemAttribute?.ManufacturingSize)
             .filter(Boolean);
 
         requiredSizes.forEach(size => {
@@ -536,7 +533,7 @@ export async function renderValidationTable(orderItems, container) {
             rows += `<tr>
                 <td class="bold-text">${escapeHTML(bNum)}</td>
                 <td>${escapeHTML(size)}</td>
-                <td class="${ok ? 'success-text' : 'error-text'}">${ok ? '✅ Verified' : '❌ Size Missing'}</td>
+                <td class="${ok ? 'success-text' : 'error-text'}">${ok ? ' Verified' : ' Size Missing'}</td>
             </tr>`;
         });
     }
@@ -544,12 +541,11 @@ export async function renderValidationTable(orderItems, container) {
     container.innerHTML = `
         <h4>Catalog Verification</h4>
         <table class="validation-table">
-            <thead><tr><th>Buyer No.</th><th>Required Size</th><th>Catalog Status</th></tr></thead>
+            <thead><tr><th>Buyer No.</th><th>Required Mfg Size</th><th>Catalog Status</th></tr></thead>
             <tbody>${rows}</tbody>
         </table>
     `;
 }
-
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 export function renderTables(orderData, containerElement) {
