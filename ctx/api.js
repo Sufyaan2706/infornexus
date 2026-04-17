@@ -45,9 +45,6 @@ export function extractPayload(rawResult, validateFn) {
     throw new Error("Could not find the expected JSON payload in the proxy response.");
 }
 
-// ---------------------------------------------------------
-// EXPORTED API METHODS
-// ---------------------------------------------------------
 
 export async function fetchUidByPoNumber(poNumber) {
     const oqlQuery = `poNumber='${poNumber}'`;
@@ -77,18 +74,4 @@ export async function fetchOrderData(orderId) {
 export function extractCatalogPayload(rawResult) {
     // For catalog, we expect a "result" property that is an Array
     return extractPayload(rawResult, data => data.result && Array.isArray(data.result));
-}
-
-export async function checkCatalogForItem(itemKeyOrBuyerNumber) {
-    // You can use 'contains' or '=' depending on how exact the match needs to be.
-    const oqlQuery = `itemKey contains '${itemKeyOrBuyerNumber}'`;
-    const targetUrl = `https://network.infornexus.com/rest/3.1.0/ProductCatalogItem/query?oql=${encodeURIComponent(oqlQuery)}`;
-
-    try {
-        const rawResult = await fetchFromProxy(targetUrl);
-        return extractCatalogPayload(rawResult);
-    } catch (e) {
-        console.warn(`Could not verify item: ${itemKeyOrBuyerNumber}`, e);
-        return { result: [] };
-    }
 }

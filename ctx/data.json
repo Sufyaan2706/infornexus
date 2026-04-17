@@ -1,0 +1,3653 @@
+{
+  "subMessageId": "1",
+
+  "redirectUrl": "https://network.infornexus.com/en/trade/PurchaseOrder?key=543641683237",
+
+  "poNumber": "4501760331",
+
+  "revisionReference": "3",
+
+  "orderUid": "540027620376",
+
+  "revisionNumber": "2603101236004630",
+
+  "orderClassType": "ORDER",
+
+  "orderStatusCode": "Open",
+
+  "orderFunctionCode": "Create",
+
+  "orderType": "ZREG",
+
+  "orderTerms": {
+    "orderDate": {
+      "Issue": "2026-02-26",
+
+      "CancelAfter": "2026-08-29"
+    },
+
+    "reference": {
+      "ERP": "S4",
+
+      "LastUpdateDate": "2026-03-10",
+
+      "PoBatchDate": "2026-03-10",
+
+      "PurchasingOrganization": "0030",
+
+      "CompanyCode": "ZA01",
+
+      "VatNumber": "CHE-385.688.021 MWST",
+
+      "DistributionChannel": null,
+
+      "OriginalFactory": "Q1Y001",
+
+      "FactoryNumber": "Q1Y001",
+
+      "TradecoModel": "1.5",
+
+      "InvoiceText": "Export Sale 0% VAT",
+
+      "PhaseIndicator": "2",
+
+      "Division": "02",
+
+      "POType": "PO",
+
+      "ContractNumber": "CCCZA01000-ZTCL-11-00010",
+
+      "PoReferenceDate1": null,
+
+      "PoReferenceNumber1": null,
+
+      "PoReferenceNumber2": null,
+
+      "PoReferenceNumber3": null,
+
+      "isMTFC": "N",
+
+      "CustomerNumber": null,
+
+      "idRevisionNumber": "2603101236004630",
+
+      "CustomerType": "Other VAS/SHAS Customer",
+
+      "ShasCustomer": null,
+
+      "OrderTypeDescription": "Regular PO",
+
+      "LiasonsOfficeCode": null,
+
+      "PhysicalFacility": null,
+
+      "CustomerOrderNumber": "--",
+
+      "PoReferenceDate2": "2026-07-21T12:00:00.000",
+
+      "PoReferenceDate3": "2026-07-21T12:00:00.000",
+
+      "HTSCodeChangeFlag": "N",
+
+      "HTSFlagUpdatedTimestamp": "--",
+
+      "PoFirstReceiptDate": "2026-02-26",
+
+      "POTotal": "7932.00"
+    },
+
+    "currencyCode": "USD",
+
+    "paymentTerms": {
+      "paymentTenorNotes": "BVDA"
+    },
+
+    "isPartialShipmentAllowed": "true",
+
+    "shipmentMethodCode": "S",
+
+    "isTransShipmentAllowed": "true",
+
+    "freightPaymentCode": "CC"
+  },
+
+  "licenseeRoleCode": "Buyer",
+
+  "party": {
+    "Buyer": [
+      {
+        "partyRoleCode": "Buyer",
+
+        "memberId": "5717989018292868",
+
+        "divisionUid": "120909",
+
+        "identification": {
+          "partnerCode": "default"
+        },
+
+        "name": "adidas International Trading AG",
+
+        "contact": {
+          "phone": "+41 41 450 04 00"
+        },
+
+        "address": {
+          "addressLine1": "Platz 1b",
+
+          "city": "Root D4",
+
+          "postalCodeNumber": "6039",
+
+          "countryCode": "CH"
+        },
+
+        "reference": {
+          "BuyingCompanyCode": "CH01",
+
+          "SapBpId": null,
+
+          "InAdidasAltId": "default"
+        }
+      }
+    ],
+
+    "Seller": [
+      {
+        "partyRoleCode": "Seller",
+
+        "memberId": "5717989018343878",
+
+        "identification": {
+          "partnerCode": "Q1Y"
+        },
+
+        "name": "RT KNITS LTD",
+
+        "contact": {
+          "phone": "230-2332751"
+        },
+
+        "address": {
+          "addressLine1": "LA TOUR KOENIG",
+
+          "city": "POINTE AUX SABLES",
+
+          "postalCodeNumber": "192409",
+
+          "countryCode": "MU"
+        },
+
+        "reference": {
+          "Name3": null,
+
+          "Name4": null,
+
+          "SapBpId": "1001252074",
+
+          "InAdidasAltId": "Q1Y"
+        }
+      }
+    ],
+
+    "BuyersAgent": [
+      {
+        "partyRoleCode": "BuyersAgent",
+
+        "memberId": "5717989018331870",
+
+        "identification": {
+          "partnerCode": "072-02"
+        },
+
+        "name": "LO EMERGING MARKETS",
+
+        "contact": {},
+
+        "address": {
+          "addressLine1": "LO EMERGING MARKETS",
+
+          "city": "EMERGING MARKETS",
+
+          "countryCode": "TR"
+        },
+
+        "reference": {
+          "Name3": null,
+
+          "Name4": null,
+
+          "SapBpId": "0000000072",
+
+          "InAdidasAltId": "072-02"
+        }
+      }
+    ],
+
+    "Importer": [
+      {
+        "partyRoleCode": "Importer",
+
+        "name": "adidas SA (Pty) Ltd",
+
+        "contact": {
+          "name": "Evah Duma",
+
+          "phone": "0027 21 442 6200"
+        },
+
+        "address": {
+          "addressLine1": "3rd Floor - Unit 2 C Black River Park North",
+
+          "addressLine2": "Fir Road Observatory",
+
+          "city": "Cape Town",
+
+          "postalCodeNumber": "7925",
+
+          "countryCode": "ZA"
+        },
+
+        "reference": {
+          "AdidasRoleCode": "CustomsCnsgee"
+        }
+      }
+    ],
+
+    "LogisticsProvider": [
+      {
+        "partyRoleCode": "LogisticsProvider",
+
+        "memberId": "5717988960034870",
+
+        "name": "DSV Air & Sea (Ocean)",
+
+        "contact": {
+          "phone": "41 61 2261111",
+
+          "fax": "41 61 2261101"
+        },
+
+        "address": {
+          "addressLine1": "Viaduktstrasse 42",
+
+          "city": "Basel",
+
+          "postalCodeNumber": "4051",
+
+          "countryCode": "CH"
+        }
+      }
+    ],
+
+    "Consignee": [
+      {
+        "partyRoleCode": "Consignee",
+
+        "name": "adidas SA (Pty) Ltd",
+
+        "contact": {
+          "name": "Evah Duma",
+
+          "phone": "0027 21 442 6200"
+        },
+
+        "address": {
+          "addressLine1": "3rd Floor - Unit 2 C Black River Park North",
+
+          "addressLine2": "Fir Road, Observatory",
+
+          "city": "Cape Town",
+
+          "postalCodeNumber": "7925",
+
+          "countryCode": "ZA"
+        },
+
+        "reference": {
+          "AdidasRoleCode": "TransportConsignee",
+
+          "AdidasAltId": "empty"
+        }
+      }
+    ],
+
+    "OriginOfGoods": [
+      {
+        "partyRoleCode": "OriginOfGoods",
+
+        "memberId": "5717989018343818",
+
+        "identification": {
+          "partnerCode": "Q1Y001"
+        },
+
+        "name": "RT KNITS LTD",
+
+        "contact": {},
+
+        "address": {
+          "addressLine1": "LA TOUR KOENIG",
+
+          "city": "Pointe aux Sables",
+
+          "postalCodeNumber": "192409",
+
+          "countryCode": "MU",
+
+          "locationCode": "MUPSB"
+        },
+
+        "reference": {
+          "Name3": null,
+
+          "Name4": null,
+
+          "SapBpId": "1001268343",
+
+          "InAdidasAltId": "Q1Y001"
+        }
+      }
+    ],
+
+    "NotifyParty1": [
+      {
+        "partyRoleCode": "NotifyParty1",
+
+        "name": "DSV South Africa (Pty) Ltd",
+
+        "contact": {
+          "name": "Shavon Sauls (SEA FREIGHT)",
+
+          "phone": "0861462884"
+        },
+
+        "address": {
+          "addressLine1": "16 Serengeti Boulevard, Wiftontein X89",
+
+          "city": "Kempton Park",
+
+          "stateOrProvince": "Gauteng",
+
+          "postalCodeNumber": "1620",
+
+          "countryCode": "ZA"
+        },
+
+        "reference": {
+          "AdidasRoleCode": "NotifyParty1"
+        }
+      }
+    ],
+
+    "NotifyParty2": [
+      {
+        "partyRoleCode": "NotifyParty2",
+
+        "name": "DSV South Africa (Pty) Ltd",
+
+        "contact": {
+          "name": "Clive Boysen (AIR FREIGHT)",
+
+          "phone": "0861462884"
+        },
+
+        "address": {
+          "addressLine1": "16 Serengeti Boulevard, Wiftontein X89",
+
+          "city": "Kempton Park",
+
+          "stateOrProvince": "Gauteng",
+
+          "postalCodeNumber": "1620",
+
+          "countryCode": "ZA"
+        },
+
+        "reference": {
+          "AdidasRoleCode": "NotifyParty2"
+        }
+      }
+    ],
+
+    "ShipmentDestination": [
+      {
+        "partyRoleCode": "ShipmentDestination",
+
+        "name": "DSV Solutions Africa",
+
+        "longName": "DSV Solutions Africa JHB",
+
+        "contact": {
+          "phone": "2711 12345"
+        },
+
+        "address": {
+          "addressLine1": "16 Serengeti Blvd,",
+
+          "addressLine2": "-",
+
+          "city": "Johannesburg",
+
+          "postalCodeNumber": "1620",
+
+          "countryCode": "ZA"
+        },
+
+        "reference": {
+          "PoBox": null,
+
+          "AdidasAltId": "empty",
+
+          "SapBpId": null,
+
+          "InAdidasAltId": null,
+
+          "LongName": "DSV Solutions Africa JHB"
+        }
+      }
+    ]
+  },
+
+  "orderItem": [
+    {
+      "itemKey": "4501760331-KK9483175-00010",
+
+      "baseItem": {
+        "itemUid": "5113522697",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "3",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "10",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332156",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "2XS"
+        },
+
+        "reference": {
+          "ItemLineNumber": "10",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00010",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-07-21",
+
+          "PlanDate": "2026-07-31",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-07-21",
+
+          "Podd": "2026-07-21",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "175",
+
+          "LastProductionDate": "2026-07-21",
+
+          "FirstProductionDate": "2026-07-21",
+
+          "ManufacturingSize": "38",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-06-21",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "1",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "Y",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483175",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "PackingType": "SSP",
+
+          "CustomerIdentifier": "ZA30",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-06-21",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "14",
+
+          "TechnicalPrintIndex": "15",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 175",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-09-07",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000010",
+
+          "PurchaseRequestReferenceId": "3002998678",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": "2711 12345",
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "CancelledQty": "1.0",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Canceled"
+        },
+
+        "quantity": "0",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-07-21T00:00:00Z",
+
+          "LatestDate": "2026-07-21T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "0"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    },
+
+    {
+      "itemKey": "4501760331-KK9483195-00020",
+
+      "baseItem": {
+        "itemUid": "5113522698",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "2",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "20",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332149",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "S"
+        },
+
+        "reference": {
+          "ItemLineNumber": "20",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00020",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-08-14",
+
+          "PlanDate": "2026-08-14",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-08-14",
+
+          "Podd": "2026-08-14",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "195",
+
+          "LastProductionDate": "2026-08-14",
+
+          "FirstProductionDate": "2026-08-14",
+
+          "ManufacturingSize": "46",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-07-15",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "2",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "N",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483195",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "CustomerIdentifier": "ZA30",
+
+          "PackingType": "SSP",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-07-15",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "18",
+
+          "TechnicalPrintIndex": "19",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 195",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-08-14",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000020",
+
+          "PurchaseRequestReferenceId": "3002998679",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": null,
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Open"
+        },
+
+        "quantity": "770",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-08-14T00:00:00Z",
+
+          "LatestDate": "2026-08-14T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "3080"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    },
+
+    {
+      "itemKey": "4501760331-KK9483235-00030",
+
+      "baseItem": {
+        "itemUid": "5113522699",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "3",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "30",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332101",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "3XL"
+        },
+
+        "reference": {
+          "ItemLineNumber": "30",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00030",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-07-21",
+
+          "PlanDate": "2026-07-31",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-07-21",
+
+          "Podd": "2026-07-21",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "235",
+
+          "LastProductionDate": "2026-07-21",
+
+          "FirstProductionDate": "2026-07-21",
+
+          "ManufacturingSize": "66",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-06-21",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "1",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "Y",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483235",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "PackingType": "SSP",
+
+          "CustomerIdentifier": "ZA30",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-06-21",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "26",
+
+          "TechnicalPrintIndex": "27",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 235",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-09-07",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000030",
+
+          "PurchaseRequestReferenceId": "3002998690",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": null,
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "CancelledQty": "4.0",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Canceled"
+        },
+
+        "quantity": "0",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-07-21T00:00:00Z",
+
+          "LatestDate": "2026-07-21T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "0"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    },
+
+    {
+      "itemKey": "4501760331-KK9483235-00040",
+
+      "baseItem": {
+        "itemUid": "5113522700",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "3",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "40",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332101",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "3XL"
+        },
+
+        "reference": {
+          "ItemLineNumber": "40",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00040",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-07-21",
+
+          "PlanDate": "2026-07-31",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-07-21",
+
+          "Podd": "2026-07-21",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "235",
+
+          "LastProductionDate": "2026-07-21",
+
+          "FirstProductionDate": "2026-07-21",
+
+          "ManufacturingSize": "66",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-06-21",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "1",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "Y",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483235",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "PackingType": "SSP",
+
+          "CustomerIdentifier": "ZA30",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-06-21",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "26",
+
+          "TechnicalPrintIndex": "27",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 235",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-09-07",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000040",
+
+          "PurchaseRequestReferenceId": "3002998693",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": null,
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "CancelledQty": "3.0",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Canceled"
+        },
+
+        "quantity": "0",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-07-21T00:00:00Z",
+
+          "LatestDate": "2026-07-21T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "0"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    },
+
+    {
+      "itemKey": "4501760331-KK9483220-00050",
+
+      "baseItem": {
+        "itemUid": "5113522701",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "2",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "50",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332132",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "XL"
+        },
+
+        "reference": {
+          "ItemLineNumber": "50",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00050",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-07-21",
+
+          "PlanDate": "2026-07-31",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-07-21",
+
+          "Podd": "2026-07-21",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "220",
+
+          "LastProductionDate": "2026-07-21",
+
+          "FirstProductionDate": "2026-07-21",
+
+          "ManufacturingSize": "58",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-06-21",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "1",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "N",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483220",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "CustomerIdentifier": "ZA30",
+
+          "PackingType": "SSP",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-06-21",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "23",
+
+          "TechnicalPrintIndex": "24",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 220",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-08-07",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000050",
+
+          "PurchaseRequestReferenceId": "3002998694",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": null,
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Open"
+        },
+
+        "quantity": "310",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-07-21T00:00:00Z",
+
+          "LatestDate": "2026-07-21T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "1240"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    },
+
+    {
+      "itemKey": "4501760331-KK9483210-00060",
+
+      "baseItem": {
+        "itemUid": "5113522702",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "2",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "60",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332118",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "L"
+        },
+
+        "reference": {
+          "ItemLineNumber": "60",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00060",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-07-21",
+
+          "PlanDate": "2026-07-31",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-07-21",
+
+          "Podd": "2026-07-21",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "210",
+
+          "LastProductionDate": "2026-07-21",
+
+          "FirstProductionDate": "2026-07-21",
+
+          "ManufacturingSize": "54",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-06-21",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "1",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "N",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483210",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "PackingType": "SSP",
+
+          "CustomerIdentifier": "ZA30",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-06-21",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "21",
+
+          "TechnicalPrintIndex": "22",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 210",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-08-07",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000060",
+
+          "PurchaseRequestReferenceId": "3002998698",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": null,
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Open"
+        },
+
+        "quantity": "600",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-07-21T00:00:00Z",
+
+          "LatestDate": "2026-07-21T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "2400"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    },
+
+    {
+      "itemKey": "4501760331-KK9483195-00070",
+
+      "baseItem": {
+        "itemUid": "5113522703",
+
+        "itemTypeCode": "Main",
+
+        "lastChangedInRevisionReference": "2",
+
+        "itemIdentifier": {
+          "ItemSequenceNumber": "70",
+
+          "BuyerNumber": "KK9483",
+
+          "ShortDescription": "ESS TEE M S26 WHITE",
+
+          "UpcNumber": "4068815332149",
+
+          "CountryOfOrigin": "MU",
+
+          "IdBuyerSize": "S"
+        },
+
+        "reference": {
+          "ItemLineNumber": "70",
+
+          "Incoterm": "FOB",
+
+          "MarketPoNumber": "4501758374",
+
+          "MarketPoItem": "00070",
+
+          "ReleaseStatus": "10",
+
+          "ProductionLeadTime": "090",
+
+          "CustomerRequestDate": "2026-07-21",
+
+          "PlanDate": "2026-07-31",
+
+          "Brand": "11",
+
+          "Division": "02",
+
+          "PoStatisticalDeliveryDate": "2026-07-21",
+
+          "Podd": "2026-07-21",
+
+          "ScSegmentation": "40",
+
+          "OriginEligibility": "N",
+
+          "Ifi1": null,
+
+          "GpsThreeDigitSize": "195",
+
+          "LastProductionDate": "2026-07-21",
+
+          "FirstProductionDate": "2026-07-21",
+
+          "ManufacturingSize": "46",
+
+          "TechnologyConceptDescription": "NO TECHNOLOGY CONCEPT",
+
+          "PackPlanDateExpected": "2026-06-21",
+
+          "TechnologyConcept": "00000",
+
+          "PriorityIndicator": "N",
+
+          "TechnicalNotation": "B3",
+
+          "ModelName": "ESS TEE M S26",
+
+          "MaterialColorDescription": "WHITE///",
+
+          "NETPR": "4.0",
+
+          "Category": "25",
+
+          "HTSEligibility": "N",
+
+          "InScopeIndicator": "N",
+
+          "LineAggregator": "1",
+
+          "ReroutingIndicator": "0",
+
+          "ReferenceDocument": "0000000000",
+
+          "ReferenceItem": "000000",
+
+          "CancelledIndicator": "N",
+
+          "OutboundDeliveryCompletedIndicator": "false",
+
+          "Storagelocation": "T001",
+
+          "Quota1": null,
+
+          "VariantArticle": "KK9483195",
+
+          "TariffDescription1": null,
+
+          "HtsCode1": null,
+
+          "PackingType": "SSP",
+
+          "CustomerIdentifier": "ZA30",
+
+          "BarcodeType": "E",
+
+          "OpenQuantity": "0.0",
+
+          "ModelNumber": "OEC27",
+
+          "ShippingInstruction": "11",
+
+          "VASCutoffDate": "2026-06-21",
+
+          "CustomerSizeRun": "2X",
+
+          "Zzmti2": "18",
+
+          "TechnicalPrintIndex": "19",
+
+          "Gender": "M",
+
+          "HideHTS": "false",
+
+          "ValidityFrom": null,
+
+          "ValidityTo": null,
+
+          "ItemCategory": "0",
+
+          "PlantId": "ZA30",
+
+          "VariantArticleShortDescription": "ESS TEE M S26 WHITE, 195",
+
+          "ShasOrder": "N",
+
+          "zfob": "4.0",
+
+          "OrderPriorityIndicator": "2",
+
+          "UnconstrainedExFactoryDate": "2026-08-07",
+
+          "ScSegmentationDescription": "Core",
+
+          "SegmentAttribute": "40",
+
+          "SegmentAttributeDesc": "Core",
+
+          "SalesOrderReferenceID": "1004695272",
+
+          "SalesOrderReferenceItemID": "000070",
+
+          "PurchaseRequestReferenceId": "3002998701",
+
+          "PurchaseRequestReferenceItemId": "00010",
+
+          "mtfcNumber": null,
+
+          "PDOFilter": "Y",
+
+          "ERP": "S4",
+
+          "FinalDestinationCode": null,
+
+          "FinalDestinationName": "DSV Solutions Africa",
+
+          "FinalDestinationLongName": "DSV Solutions Africa JHB",
+
+          "FinalDestinationAddressLine1": "16 Serengeti Blvd,",
+
+          "FinalDestinationAddressLine2": "-",
+
+          "FinalDestinationCity": "Johannesburg",
+
+          "FinalDestinationStateOrProvince": null,
+
+          "FinalDestinationPostalCodeNumber": "1620",
+
+          "FinalDestinationCountry": "ZA",
+
+          "FinalDestinationEmail": null,
+
+          "FinalDestinationPhone": null,
+
+          "FinalDestinationFax": null,
+
+          "FinalDestinationContactName": null,
+
+          "FinalDestinationDepartment": null,
+
+          "FinalDestinationRegion": null,
+
+          "CurrencyCode": "USD",
+
+          "WarehouseLocationCode": "--",
+
+          "SubsidiaryShipToCustomerNumber": "--",
+
+          "ReleaseStatusDesc": "Confirmed",
+
+          "REXRequired": "N",
+
+          "CustomerNumber": "--",
+
+          "AccountAssignmentCategory": "--",
+
+          "articleName": "ESS TEE M S26 WHITE",
+
+          "articleNumber": "KK9483",
+
+          "WorkingNumber": "--",
+
+          "BusinessModelAttribute": "--",
+
+          "DestinationCountry": "ZA",
+
+          "SailType": "11 - Sea Freight Collect",
+
+          "AdidasShipMode": "S",
+
+          "PricePerUnit": "4",
+
+          "CustomerSizeRunDesc": "FTW WOMENS TRAINING",
+
+          "DummyPriceIndicator": "N",
+
+          "OrderGroup": "Bulk",
+
+          "CustomsBroker": null,
+
+          "Workflow": "Scan & Pack",
+
+          "AllowMixedPoPacking": "false",
+
+          "LabelID": "GLBUCC0004",
+
+          "PortOfLoading": "MUPLU",
+
+          "PortOfDischarge": "ZAJNB",
+
+          "Trucker": null,
+
+          "AccountNumber": null,
+
+          "LspAdidasCode": "Panalpina",
+
+          "PortOrDoorDelivery": null,
+
+          "Classification": "Bulk",
+
+          "Integrated3pl": "Y",
+
+          "Region": null,
+
+          "MultipleContainers": "true",
+
+          "BrandDescription": "ADIDAS",
+
+          "SportsDescription": "ORIGINALS",
+
+          "PoaCritical": "false",
+
+          "ScanPackCritical": "false",
+
+          "TiCritical": "false",
+
+          "CustomerOrderNumber": "--",
+
+          "PurchasingOrganization": "0030",
+
+          "OrderTypeDescription": "Regular PO",
+
+          "OriginalFactory": "Q1Y001",
+
+          "FactoryNumber": "Q1Y001",
+
+          "DistributionChannel": null,
+
+          "LastUpdateDate": "2026-03-10",
+
+          "PoBatchDate": "2026-03-10",
+
+          "VatNumber": "CHE-385.688.021 MWST",
+
+          "ItemStatus": "Open"
+        },
+
+        "quantity": "303",
+
+        "unitOfMeasureCode": "EA",
+
+        "itemDate": {
+          "EarliestDate": "2026-07-21T00:00:00Z",
+
+          "LatestDate": "2026-07-21T00:00:00Z"
+        },
+
+        "shipmentMethodCode": "S",
+
+        "itemVariance": {
+          "upperVariance": "0",
+
+          "lowerVariance": "0",
+
+          "varianceTypeCode": "Percent"
+        },
+
+        "party": [
+          {
+            "partyRoleCode": "ShipmentDestination",
+
+            "name": "DSV Solutions Africa"
+          },
+
+          {
+            "partyRoleCode": "Consignee",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty1",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "NotifyParty2",
+
+            "name": "DSV South Africa (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "Importer",
+
+            "name": "adidas SA (Pty) Ltd"
+          },
+
+          {
+            "partyRoleCode": "LogisticsProvider",
+
+            "name": "DSV Air & Sea (Ocean)"
+          },
+
+          {
+            "partyRoleCode": "OriginOfGoods",
+
+            "name": "RT KNITS LTD"
+          }
+        ]
+      },
+
+      "itemPrice": {
+        "pricePerUnit": "4",
+
+        "totalPrice": "1212"
+      },
+
+      "itemTax": [
+        {
+          "taxType": "V0",
+
+          "description": "00% Input VAT - No Tax Procedure",
+
+          "taxRate": "0"
+        }
+      ],
+
+      "incotermCode": "FOB",
+
+      "incotermLocationCode": "MUPLU",
+
+      "originLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPSB",
+
+        "longName": "MUPSB",
+
+        "address": {
+          "city": "Pointe aux Sables",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPSB"
+        }
+      },
+
+      "originGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "MUPLU",
+
+        "longName": "MUPLU",
+
+        "address": {
+          "city": "Port Louis",
+
+          "countryCode": "MU",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "MUPLU"
+        }
+      },
+
+      "destinationLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      },
+
+      "destinationGatewayLocation": {
+        "locationTypeCode": "None",
+
+        "name": "ZAJNB",
+
+        "longName": "ZAJNB",
+
+        "address": {
+          "city": "Johannesburg",
+
+          "countryCode": "ZA",
+
+          "locationQualifierCode": "UNLocationCode",
+
+          "locationCode": "ZAJNB"
+        }
+      }
+    }
+  ],
+
+  "totals": {
+    "totalQuantity": "1983",
+
+    "totalMerchandiseAmount": "7932.00",
+
+    "totalDocumentAmount": "7932.00"
+  },
+
+  "__metadata": {
+    "apiVersion": "3.1.0",
+
+    "type": "OrderDetail",
+
+    "uid": "540027620376",
+
+    "createTimestamp": "2026-02-26 23:53:49.603",
+
+    "modifyTimestamp": "2026-03-10 12:39:28.147",
+
+    "status": "Open",
+
+    "isAmendment": "false",
+
+    "fingerprint": "f0bdcd4cd6ffcc1d5bbb8e9d3fc29e81",
+
+    "redirectUrl": "https://network.infornexus.com/en/trade/Order?key=540027620376",
+
+    "self": "https://network.infornexus.com/rest/3.1.0/OrderDetail/540027620376"
+  }
+}

@@ -1,3 +1,5 @@
+/* ─── Base Typography & Global ──────────────────────────────────────────────── */
+
 h1 {
     text-align: center;
     text-transform: uppercase;
@@ -21,12 +23,18 @@ a {
     color: #008CBA;
 }
 
+img {
+    padding: 5px;
+    height: auto;
+}
+
 .m-logo {
     width: auto;
     height: 50px;
 }
 
-/* Base table styles (Restored for Pages/All View) */
+/* ─── Base Table ─────────────────────────────────────────────────────────────── */
+
 table {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
@@ -58,23 +66,9 @@ th {
     color: white;
 }
 
-img {
-    padding: 5px;
-    height: auto;
-}
+/* ─── Utility ────────────────────────────────────────────────────────────────── */
 
-.search-bar {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 10px;
-}
-
-.error {
-    color: red;
-    margin-top: 10px;
-}
-
+.error,
 .empty-pack-msg {
     color: red;
     margin-top: 10px;
@@ -82,6 +76,8 @@ img {
 
 .loading {
     margin-top: 10px;
+    color: #555;
+    font-style: italic;
 }
 
 .bold-text {
@@ -92,61 +88,108 @@ img {
     color: #666;
 }
 
+.error-text {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.success-text {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* ─── Search Bar ─────────────────────────────────────────────────────────────── */
+
+.search-bar {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+}
+
+/* ─── Sections ───────────────────────────────────────────────────────────────── */
+
 .order-section {
     margin-bottom: 40px;
 }
 
 .line-agg-section {
     margin-bottom: 30px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
 }
 
-.pack-btn {
-    margin-top: 10px;
-    margin-bottom: 15px;
-    padding: 8px 16px;
-    background-color: #003366;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
+.line-agg-section>h3 {
+    margin: 0 0 12px 0;
+    color: #003366;
+    font-size: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
 }
 
-.pack-btn:hover {
-    background-color: #00509e;
-}
+/* ─── 3-Panel Layout (Paginated / All view) ──────────────────────────────────
+   On a 1920px screen the three panels sit side-by-side in one row:
+     • original-table-wrapper  — the raw order data   (flex: 2)
+     • packing-container       — packing table         (flex: 3)
+     • validation-container    — catalog verification  (flex: 1.5)
+   Narrower screens fall back gracefully via column wrapping.
+──────────────────────────────────────────────────────────────────────────── */
 
 .tables-container {
     display: flex;
-    gap: 20px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    /* side-by-side on 1920px */
+    gap: 16px;
     align-items: flex-start;
-    margin-top: 10px;
     width: 100%;
+    box-sizing: border-box;
+}
+
+/* Wrap to rows below ~900px */
+@media (max-width: 900px) {
+    .tables-container {
+        flex-wrap: wrap;
+    }
 }
 
 .original-table-wrapper {
-    flex: 1;
+    flex: 2;
     min-width: 0;
+    /* lets flex shrink past content width */
+    overflow-x: auto;
 }
 
 .packing-container {
-    flex: 1;
+    flex: 3;
     min-width: 0;
     overflow-x: auto;
 }
 
+.validation-container {
+    flex: 1.5;
+    min-width: 180px;
+    overflow-x: auto;
+}
+
+.validation-container h4 {
+    margin: 0 0 8px 0;
+    color: #003366;
+    font-size: 13px;
+}
+
+/* ─── Packing Table ──────────────────────────────────────────────────────────── */
+
 .packing-table {
-    margin-top: 0;
-    font-size: 14px;
+    font-size: 13px;
     border: 1px solid #ccc;
 }
 
 .packing-table th,
 .packing-table td {
-    padding: 8px;
-}
-
-.packing-table thead {
-    background-color: #eee;
+    padding: 6px 8px;
 }
 
 .packing-table th {
@@ -165,7 +208,10 @@ img {
     color: #555;
     font-style: italic;
     padding: 5px;
+    white-space: nowrap;
 }
+
+/* ─── Inputs ─────────────────────────────────────────────────────────────────── */
 
 .max-qty-header-input,
 .weight-header-input {
@@ -173,8 +219,8 @@ img {
     box-sizing: border-box;
     text-align: center;
     border: 1px solid #ccc;
-    padding: 4%;
-    font-size: 14px;
+    padding: 3px 4px;
+    font-size: 13px;
 }
 
 .transparent-input {
@@ -197,6 +243,24 @@ img {
     background-color: #fafafa;
 }
 
+/* ─── Validation Table ───────────────────────────────────────────────────────── */
+
+.validation-table {
+    font-size: 13px;
+}
+
+.validation-table th {
+    background-color: #003366;
+    color: white;
+    padding: 8px;
+}
+
+.validation-table td {
+    padding: 6px 8px;
+}
+
+/* ─── Global Settings Panel ──────────────────────────────────────────────────── */
+
 .global-settings {
     margin-bottom: 20px;
     padding: 15px;
@@ -214,9 +278,9 @@ img {
 .global-sizes-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: flex-start;
 }
 
 .global-size-block {
@@ -225,7 +289,7 @@ img {
     border-radius: 4px;
     background: white;
     text-align: center;
-    width: 100px;
+    width: 90px;
 }
 
 .global-size-block strong {
@@ -257,18 +321,29 @@ img {
     margin-top: 15px;
 }
 
+/* ─── Buttons ────────────────────────────────────────────────────────────────── */
+
+.pack-btn {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 8px 16px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+.pack-btn:hover {
+    background-color: #00509e;
+}
+
 .global-export-btn {
     display: block;
     margin: 20px auto;
     padding: 12px 24px;
     font-size: 16px;
-}
-
-.view-controls {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: 20px;
 }
 
 .nav-btn {
@@ -295,6 +370,17 @@ img {
     font-size: 14px;
 }
 
+/* ─── View Controls ──────────────────────────────────────────────────────────── */
+
+.view-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 20px;
+}
+
+/* ─── Pagination ─────────────────────────────────────────────────────────────── */
+
 .pagination-controls {
     display: flex;
     justify-content: center;
@@ -308,6 +394,7 @@ img {
     border: 1px solid #ccc;
     background: white;
     font-size: 14px;
+    border-radius: 3px;
 }
 
 .page-btn.active-page {
@@ -316,33 +403,33 @@ img {
     font-weight: bold;
 }
 
-
-/* =========================================================
-   NEW GRID LAYOUT: Miniaturized Tables ONLY on Summary Page 
-   ========================================================= */
+/* ─── Summary View Grid ──────────────────────────────────────────────────────
+   Miniaturised cards in a responsive grid.
+   1920px → 3 columns, 1400px → 2 columns, <900px → 1 column.
+──────────────────────────────────────────────────────────────────────────── */
 
 .summary-view-container {
     display: grid;
-    /* Forces a 2-column grid by default */
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
     align-items: start;
 }
 
-/* Break into a 3x3 grid if the screen is large enough */
 @media (min-width: 1400px) {
     .summary-view-container {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
+@media (max-width: 900px) {
+    .summary-view-container {
+        grid-template-columns: 1fr;
+    }
+}
+
 .summary-view-container .line-agg-section {
     margin-bottom: 0;
-    border: 1px solid #ccc;
     padding: 10px;
-    border-radius: 6px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .summary-view-container .summary-header {
@@ -360,34 +447,29 @@ img {
     margin: 0;
     color: #003366;
     font-size: 13px;
-    /* Scaled down header */
 }
 
-/* Shrink table text to fit in grid */
+/* Scale down table content to fit grid cards */
 .summary-view-container table {
     font-size: 11px;
 }
 
-/* Tighten the padding drastically */
 .summary-view-container th,
 .summary-view-container td {
     padding: 3px 4px;
 }
 
-/* Shrink inputs inside the summary grid */
 .summary-view-container .max-qty-header-input,
 .summary-view-container .weight-header-input {
     padding: 2px;
     font-size: 11px;
 }
 
-/* Shrink the "Go to Table" button so it fits gracefully */
 .summary-view-container .nav-btn {
     padding: 4px 8px;
     font-size: 11px;
 }
 
-/* If a packing table has too many sizes, allow it to scroll horizontally inside its cell without breaking the grid */
 .summary-view-container .packing-container {
     overflow-x: auto;
     max-width: 100%;

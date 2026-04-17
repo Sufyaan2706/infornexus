@@ -29,7 +29,7 @@ export function renderCatalogUI(catalogItems, containerElement) {
         const attributes = item.itemAttribute || {};
         const size = escapeHTML(attributes.ManufacturingSize);
         const buyerNumber = escapeHTML(attributes.buyerItemNumber);
-        
+
         const netWeight = escapeHTML(attributes['measurements/netWeight']);
         const weightUnit = escapeHTML(attributes['measurements/weightUnit'] || 'KG');
 
@@ -53,9 +53,7 @@ export function renderCatalogUI(catalogItems, containerElement) {
     containerElement.appendChild(fragment);
 }
 
-// ==========================================
-// 2. FETCHING & CONTROLLER LOGIC
-// ==========================================
+
 const catalogContainer = document.getElementById('catalog-container');
 const loadCatalogBtn = document.getElementById('loadCatalogBtn');
 
@@ -81,6 +79,7 @@ async function loadCatalog() {
 }
 
 // Initialize when the script is loaded
+
 if (catalogContainer) {
     if (loadCatalogBtn) {
         loadCatalogBtn.addEventListener('click', loadCatalog);
