@@ -283,7 +283,10 @@ export class PackingUI {
 
                 const makeRow = (lbl, val, cnt) => {
                     const cells = sizes.map(s => s === size ? `<td><input type="text" value="${val}" class="transparent-input" data-seq="${seqNo}" readonly></td>` : '<td></td>').join('');
-                    return `<tr><td><strong>${lbl}</strong></td>${cells}<td>${cnt}</td><td>${cnt * val}</td></tr>`;
+                    return `<tr><td><strong>${lbl}</strong></td>
+                    ${cells}<td>${cnt}</td>
+                    <td>${seqNo}</td>
+                    <td>${cnt * val}</td></tr>`;
                 };
 
                 if (full > 0) {
@@ -300,7 +303,9 @@ export class PackingUI {
         return `
             <table class="packing-table">
                 <thead>
-                    <tr><th rowspan="2">CTN NO</th><th colspan="${sizes.length}">SIZE</th><th rowspan="2">TOTAL CTNS</th><th rowspan="2">SHIPMENT QNTY</th></tr>
+                    <tr><th rowspan="2">CTN NO</th><th colspan="${sizes.length}">SIZE</th><th rowspan="2">TOTAL CTNS</th>
+                    <th rowspan="2">Seq #</th>
+                    <th rowspan="2">SHIPMENT QNTY</th></tr>
                     <tr>${sizes.map(s => `<th>${s}</th>`).join('')}</tr>
                     <tr><td>Max qty/box:</td>${sizes.map(s => `<td><input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" min="1"></td>`).join('')}<td colspan="2"></td></tr>
                 </thead>
