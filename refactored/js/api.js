@@ -57,7 +57,7 @@ export class ApiClient {
     }
 
     static async fetchBulkCatalog() {
-        const url = `${Config.apiBaseUrl}/ProductCatalogItem/adidasWeightsUnified5717989018343878/list`;
+        const url = `${Config.apiBaseUrl}/ProductCatalogItem/${Config.catalogListId}/list`;
         try {
             const result = await this.fetchFromProxy(url);
             return this._extractPayload(result, d => d.result && Array.isArray(d.result));

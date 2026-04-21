@@ -24,7 +24,6 @@ export class AppState {
         this.lineAggKeys = [];
         this.tableConfigs = {};
 
-        // NEW: Store our dynamic UI data here
         this.packingData = {};
         this.validationWeights = {};
 
@@ -34,6 +33,10 @@ export class AppState {
         this.container = null;
         this.globalMaxMap = {};
         this.sortedSizes = [];
+
+        // MOQ properties
+        this.moqValue = 8;
+        this.globalSizeTotals = {};
     }
 
     load(orderData, container) {
@@ -42,11 +45,25 @@ export class AppState {
         this.tableConfigs = {};
         this.packingData = {};
 
-        const parsedItems = orderData.orderItem.map(raw => new OrderItem(raw));
-        this.groups = Utils.groupBy(parsedItems, 'lineAgg');
+        const allParsedItems = orderData.orderItem.map(raw => new OrderItem(raw));
+
+        // 1. Calculate the "True" Global Totals for every size across all aggregators
+        this.globalSizeTotals = {};
+        allParsedItems.forEach(item => {
+            const s = item.size || 'Unknown';
+            this.globalSizeTotals[s] = (this.globalSizeTotals[s] || 0) + item.qty;
+        });
+
+        // 2. Filter items based on the current MOQ
+        const filteredItems = allParsedItems.filter(item =>
+            this.globalSizeTotals[item.size] >= this.moqValue
+        );
+
+        // Group the remaining filtered items
+        this.groups = Utils.groupBy(filteredItems, 'lineAgg');
         this.lineAggKeys = Object.keys(this.groups);
 
-        const sizes = new Set(parsedItems
+        const sizes = new Set(filteredItems
             .map(item => item.size)
             .filter(size => size && size !== '-')
             .map(Utils.escapeHTML)
@@ -64,16 +81,29 @@ export class AppState {
     }
 
     ensureConfig(lineAgg, items) {
-        if (this.tableConfigs[lineAgg]) return;
-        const config = { maxQtyMap: {} };
 
-        items.forEach(item => {
-            const size = Utils.escapeHTML(item.size);
-            if (item.qty > 0 && size !== '-') {
-                config.maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
-            }
+        const validSizes = new Set(
+            items
+                .filter(item => item.qty > 0 && item.size && item.size !== '-')
+                .map(item => Utils.escapeHTML(item.size))
+        );
+
+        const existing = this.tableConfigs[lineAgg];
+
+        // If a config already exists, prune any sizes that are no longer valid, then return.
+        if (existing) {
+            Object.keys(existing.maxQtyMap).forEach(size => {
+                if (!validSizes.has(size)) delete existing.maxQtyMap[size];
+            });
+            return;
+        }
+
+        // No config yet — create one from scratch using globalMaxMap defaults.
+        const maxQtyMap = {};
+        validSizes.forEach(size => {
+            maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
         });
-        this.tableConfigs[lineAgg] = config;
+        this.tableConfigs[lineAgg] = { maxQtyMap };
     }
 }
 
@@ -103,18 +133,46 @@ export class UIController {
     _renderTopControls() {
         const topControlsWrap = Utils.el('div', {
             className: 'top-controls-wrapper',
-            style: { display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '20px' }
+            style: { display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }
         });
 
-        this._renderSettings(topControlsWrap);
+        // MOQ Settings Bar
+        const moqBar = Utils.el('div', {
+            className: 'moq-settings-bar',
+            style: { background: '#f4f4f4', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }
+        });
+
+        moqBar.innerHTML = `
+            <strong>Global MOQ Filter:</strong>
+            <input type="number" id="moq-input" value="${this.state.moqValue}" min="0" style="width: 80px; margin: 0 10px;">
+            <button id="apply-moq-btn" class="pack-btn">Update MOQ</button>
+            <small style="margin-left: 10px; color: #666;">(Sizes with total qty below this threshold will be hidden)</small>
+        `;
+
+        moqBar.querySelector('#apply-moq-btn').onclick = () => {
+            const val = parseInt(document.getElementById('moq-input').value, 10);
+            this.state.moqValue = isNaN(val) ? 0 : val;
+            // Clear all cached configs so ensureConfig rebuilds them
+            // against the newly filtered item sets.
+            this.state.tableConfigs = {};
+            this.state.load(this.state.orderData, this.state.container);
+            this.render();
+        };
+
+        topControlsWrap.appendChild(moqBar);
+
+        // Container for Max Qty settings and Validation
+        const settingsFlex = Utils.el('div', { style: { display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' } });
+
+        this._renderSettings(settingsFlex);
 
         const valWrap = Utils.el('div', { className: 'global-validation-container', style: { flex: '1 1 40%', overflowX: 'auto' } });
-        topControlsWrap.appendChild(valWrap);
+        settingsFlex.appendChild(valWrap);
 
         const allItems = Object.values(this.state.groups).flat();
-        // Pass state into ValidationUI so it can save weight updates
         new ValidationUI(this.state).render(allItems, valWrap);
 
+        topControlsWrap.appendChild(settingsFlex);
         this.state.container.appendChild(topControlsWrap);
     }
 
@@ -130,14 +188,12 @@ export class UIController {
         views[this.state.currentView]();
     }
 
-    // NEW: Robust Export Logic
 
     _renderExportButton() {
         const onLastPage = this.state.currentPage === this.state.totalPages || this.state.totalPages === 0;
         if (this.state.currentView === 'all' || (this.state.currentView === 'paginated' && onLastPage)) {
             const btn = Utils.el('button', { className: 'pack-btn global-export-btn', html: 'Log JSON to Console' });
 
-            // Pass the entire AppState to the exporter to keep things separated
             btn.onclick = () => {
                 OrderExporter.extractToJson(this.state);
             };
@@ -178,6 +234,26 @@ export class UIController {
     }
 
     _renderSummary(wrapper) {
+        // Global Totals Indicator Header
+        const statsHeader = Utils.el('div', {
+            className: 'global-stats-summary',
+            style: { marginBottom: '20px', padding: '15px', border: '1px solid #ddd', background: '#f9f9f9', borderRadius: '4px' }
+        });
+
+        let statsHtml = '<h4 style="margin-top:0;">Global Size Totals (All Aggregators)</h4><div style="display: flex; gap: 10px; flex-wrap: wrap;">';
+        Object.entries(this.state.globalSizeTotals).sort((a, b) => Utils.compareSizes(a[0], b[0])).forEach(([size, total]) => {
+            const isExcluded = total < this.state.moqValue;
+            statsHtml += `
+                <div class="size-stat-badge" style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; background: ${isExcluded ? '#ffebee' : '#e8f5e9'}">
+                    <strong style="color: ${isExcluded ? '#c62828' : '#2e7d32'}">${Utils.escapeHTML(size)}:</strong> ${total}
+                    ${isExcluded ? ' <small>(Hidden)</small>' : ''}
+                </div>`;
+        });
+        statsHtml += '</div>';
+        statsHeader.innerHTML = statsHtml;
+        wrapper.appendChild(statsHeader);
+
+        // Individual Aggregator Sections
         const container = Utils.el('div', { className: 'summary-view-container' });
         this.state.lineAggKeys.forEach((agg, index) => {
             const items = this.state.groups[agg];
@@ -312,7 +388,6 @@ export class PackingUI {
                 const rem = qty % max;
 
                 const makeRow = (lbl, val, cnt) => {
-                    // Save data for the JSON exporter
                     currentPackingLines.push({
                         cartonLabel: lbl,
                         size: size,

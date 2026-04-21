@@ -12,4 +12,5 @@ export class Config {
     static get proxyUrl() { return "http://10.0.0.87:8082/api/infornexus/auth"; }
     static get apiBaseUrl() { return "https://network.infornexus.com/rest/3.1.0"; }
     static get customerId() { return "adidas_sa_ltd"; }
+    static get catalogListId() { return 'adidasWeightsUnified5717989018343878'; }
 }
