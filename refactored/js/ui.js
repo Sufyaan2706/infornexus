@@ -210,16 +210,7 @@ export class UIController {
 
         wrapper.appendChild(Utils.el('table', {
             html: `
-                <thead><tr>
-                <th>Size</th>
-                <th>Seq #</th>
-                <th>Ship Mode</th>
-                <th>Status</th>
-                <th>Qty</th>
-                <th>Mfg Size</th>
-                <th>Up Var</th>
-                <th>Low Var</th>
-                </tr></thead>
+                <thead><tr><th>Size</th><th>Seq #</th><th>Ship Mode</th><th>Status</th><th>Qty</th><th>Mfg Size</th><th>Up Var</th><th>Low Var</th></tr></thead>
                 <tbody>${rows}<tr class="total-row"><td colspan="4"><strong>TOTAL</strong></td><td><strong>${items.reduce((s, i) => s + i.qty, 0)}</strong></td></tr></tbody>
             `
         }));
@@ -292,12 +283,7 @@ export class PackingUI {
 
                 const makeRow = (lbl, val, cnt) => {
                     const cells = sizes.map(s => s === size ? `<td><input type="text" value="${val}" class="transparent-input" data-seq="${seqNo}" readonly></td>` : '<td></td>').join('');
-                    return `<tr>
-                    <td><strong>${lbl}</strong></td>${cells}
-                    <td>${cnt}</td>
-                    <td>${seqNo}</td>
-                    <td>${cnt * val}</td>
-                    </tr>`;
+                    return `<tr><td><strong>${lbl}</strong></td>${cells}<td>${cnt}</td><td>${cnt * val}</td></tr>`;
                 };
 
                 if (full > 0) {
@@ -314,12 +300,7 @@ export class PackingUI {
         return `
             <table class="packing-table">
                 <thead>
-                    <tr>
-                    <th rowspan="2">CTN NO</th>
-                    <th colspan="${sizes.length}">SIZE</th>
-                    <th rowspan="2">TOTAL CTNS</th><th rowspan="2">Seq #</th>
-                    <th rowspan="2">SHIPMENT QNTY</th>
-                    </tr>
+                    <tr><th rowspan="2">CTN NO</th><th colspan="${sizes.length}">SIZE</th><th rowspan="2">TOTAL CTNS</th><th rowspan="2">SHIPMENT QNTY</th></tr>
                     <tr>${sizes.map(s => `<th>${s}</th>`).join('')}</tr>
                     <tr><td>Max qty/box:</td>${sizes.map(s => `<td><input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" min="1"></td>`).join('')}<td colspan="2"></td></tr>
                 </thead>
@@ -345,27 +326,34 @@ export class ValidationUI {
         const catalog = await ApiClient.fetchBulkCatalog();
         const buyers = [...new Set(items.map(i => i.buyerNumber).filter(Boolean))];
 
-        // Grab the common Buyer Number for the header
+        // Grab the common Buyer Number for the header (first one found)
         const mainBuyerNumber = buyers.length > 0 ? buyers[0] : 'Unknown';
+
+        const catalogItems = catalog?.item || catalog?.result || catalog || [];
+
+        // Prepare list of all display sizes (used in default settings box)
+        const allDisplaySizes = [...new Set(
+            items.map(i => i.size).filter(s => s && s !== '-')
+        )].sort(Utils.compareSizes);
 
         let rows = '';
         buyers.forEach(bNum => {
-            const reqSizes = [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))];
-            const found = catalog.result?.filter(c => c.itemAttribute?.buyerItemNumber === bNum) || [];
+            // Cast to string for reliable comparison
+            const found = catalogItems.filter(c => String(c.itemAttribute?.buyerItemNumber) === String(bNum));
 
-            if (!found.length) {
-                rows += `<tr class="error-text"><td colspan="2">No data found for Buyer ${Utils.escapeHTML(bNum)}</td></tr>`;
-                return;
-            }
+            // If no catalog data for this buyer, use all display sizes as required sizes
+            const reqSizes = found.length
+                ? [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))]
+                : allDisplaySizes;
 
             reqSizes.forEach(size => {
-                const catalogItem = found.find(c => c.itemAttribute?.ManufacturingSize === size);
+                // For missing catalog, catalogItem will be undefined
+                const catalogItem = found.length
+                    ? found.find(c => String(c.itemAttribute?.ManufacturingSize) === String(size))
+                    : null;
                 const ok = !!catalogItem;
-
-                // Pull value, defaulting to empty string if missing so the input field remains clean
                 const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
 
-                // Apply color class to the whole row
                 rows += `<tr class="${ok ? 'success-text' : 'error-text'}">
                     <td>${Utils.escapeHTML(size)}</td>
                     <td><input type="number" step="0.01" class="val-weight-input" value="${Utils.escapeHTML(netWeight)}" placeholder="Weight"></td>

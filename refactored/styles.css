@@ -243,23 +243,54 @@ th {
     background-color: #fafafa;
 }
 
-/* ─── Validation Table ───────────────────────────────────────────────────────── */
+/* ─── Verification Table ─────────────────────────────────────────────────────── */
 
-.validation-table {
+.verification-table {
     font-size: 13px;
+    table-layout: fixed;
+    width: auto;
+    min-width: 260px;
+    max-width: 360px;
 }
 
-.validation-table th {
+.verification-table col:nth-child(1) {
+    width: 120px;
+}
+
+.verification-table col:nth-child(2) {
+    width: 140px;
+}
+
+.verification-table th {
     background-color: #003366;
     color: white;
     padding: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.validation-table td {
+.verification-table td {
     padding: 6px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.verification-table .val-weight-input {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 3px 4px;
+    font-size: 13px;
 }
 
 /* ─── Global Settings Panel ──────────────────────────────────────────────────── */
+
+.top-controls-wrapper {
+    margin-bottom: 20px;
+}
 
 .global-settings {
     margin-bottom: 20px;
@@ -269,10 +300,20 @@ th {
     border-radius: 5px;
 }
 
+.settings-divider {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 16px 0;
+}
+
+.global-validation-container {
+    overflow-x: auto;
+}
+
 .global-settings h3 {
     margin-top: 0;
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 28px;
 }
 
 .global-sizes-container {
