@@ -148,6 +148,26 @@ th {
     box-sizing: border-box;
 }
 
+
+.select-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.nav-select {
+    padding: 8px 12px;
+    border: 1px solid #003366;
+    background: white;
+    color: #003366;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+
 /* Wrap to rows below ~900px */
 @media (max-width: 900px) {
     .tables-container {
