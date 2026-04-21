@@ -1,7 +1,8 @@
 import { Utils } from './utils.js';
 
 export class OrderExporter {
-    static extractToJson(orderData) {
+    static extractToJson(state) {
+        const orderData = state.orderData;
         if (!orderData || !Array.isArray(orderData.orderItem)) return null;
 
         const poNumber = orderData.poNumber ?? 'Unknown_PO';
@@ -18,7 +19,13 @@ export class OrderExporter {
             const size = id.IdBuyerSize ?? 'Unknown';
 
             lineAggsLevel[lineAgg] ??= {};
-            lineAggsLevel[lineAgg][size] ??= { maxBoxQty: 0, weightPerItem: 0, totalShipmentQtyPerSize: 0, items: [] };
+            lineAggsLevel[lineAgg][size] ??= {
+                maxBoxQty: state.tableConfigs[lineAgg]?.maxQtyMap[size] || 0,
+                weightPerItem: state.validationWeights[size] || 0,
+                totalShipmentQtyPerSize: 0,
+                items: [],
+                packingDetails: []
+            };
 
             const qty = parseFloat(bi.quantity || 0);
             lineAggsLevel[lineAgg][size].items.push({
@@ -35,36 +42,39 @@ export class OrderExporter {
             lineAggsLevel[lineAgg][size].totalShipmentQtyPerSize += qty;
         });
 
-        this._enrichFromUI(lineAggsLevel);
-        return this._sortSchema(jsonSchema, poNumber, uid, lineAggsLevel);
+        // 2. Enrich with real-time UI state
+        this._enrichFromState(lineAggsLevel, state.packingData);
+
+        // 3. Sort and dump to console
+        return this._sortAndLogSchema(jsonSchema, poNumber, uid, lineAggsLevel);
     }
 
-    static _enrichFromUI(lineAggsLevel) {
-        for (const lineAgg in lineAggsLevel) {
-            const containerId = `packing-${lineAgg.replace(/\W/g, '_')}`;
-            const container = document.getElementById(containerId);
-            if (!container || !container.querySelector('table')) continue;
+    static _enrichFromState(lineAggsLevel, packingData) {
+        for (const lineAgg in packingData) {
+            if (!lineAggsLevel[lineAgg]) continue;
 
-            for (const size in lineAggsLevel[lineAgg]) {
-                const sizeData = lineAggsLevel[lineAgg][size];
+            const lines = packingData[lineAgg];
+            lines.forEach(packLine => {
+                const size = packLine.size;
+                if (lineAggsLevel[lineAgg][size]) {
+                    // Push the full packing row details into the size data
+                    lineAggsLevel[lineAgg][size].packingDetails.push(packLine);
 
-                const maxQty = container.querySelector(`.max-qty-header-input[data-size="${size}"]`)?.value;
-                if (maxQty) sizeData.maxBoxQty = parseInt(maxQty, 10);
-
-                const weight = container.querySelector(`.weight-header-input[data-size="${size}"]`)?.value;
-                if (weight) sizeData.weightPerItem = parseFloat(weight);
-
-                sizeData.items.forEach(item => {
-                    const seq = Utils.escapeHTML(item.itemSequenceNo);
-                    const inputs = container.querySelectorAll(`.transparent-input[data-seq="${seq}"]`);
-                    const cartons = Array.from(inputs).map(i => i.closest('tr')?.cells[0].innerText.trim()).filter(Boolean);
-                    if (cartons.length) item.cartonNumbers = cartons.join(", ");
-                });
-            }
+                    // Update the specific item's carton number based on sequence
+                    const targetItem = lineAggsLevel[lineAgg][size].items.find(i => i.itemSequenceNo === packLine.sequenceNumber);
+                    if (targetItem) {
+                        if (targetItem.cartonNumbers === "N/A") {
+                            targetItem.cartonNumbers = packLine.cartonLabel;
+                        } else {
+                            targetItem.cartonNumbers += `, ${packLine.cartonLabel}`;
+                        }
+                    }
+                }
+            });
         }
     }
 
-    static _sortSchema(schema, poNumber, uid, lineAggsLevel) {
+    static _sortAndLogSchema(schema, poNumber, uid, lineAggsLevel) {
         const sorted = { [poNumber]: { [uid]: {} } };
         const sortedAggs = sorted[poNumber][uid];
 
@@ -75,6 +85,7 @@ export class OrderExporter {
             });
         });
 
+        console.log('--- EXPORTED ORDER DATA ---');
         console.log(JSON.stringify(sorted, null, 2));
         return sorted;
     }

@@ -1,6 +1,6 @@
 import { Utils } from './utils.js';
-import { OrderExporter } from './export.js';
 import { ApiClient } from './api.js';
+import { OrderExporter } from './export.js';
 
 export class OrderItem {
     constructor(item) {
@@ -23,6 +23,11 @@ export class AppState {
         this.groups = {};
         this.lineAggKeys = [];
         this.tableConfigs = {};
+
+        // NEW: Store our dynamic UI data here
+        this.packingData = {};
+        this.validationWeights = {};
+
         this.currentView = 'paginated';
         this.currentPage = 1;
         this.itemsPerPage = 5;
@@ -34,17 +39,18 @@ export class AppState {
     load(orderData, container) {
         this.orderData = orderData;
         this.container = container;
-        this.groups = {};
         this.tableConfigs = {};
+        this.packingData = {};
 
-        const sizes = new Set();
-        orderData.orderItem.forEach(rawItem => {
-            const item = new OrderItem(rawItem);
-            (this.groups[item.lineAgg] ??= []).push(item);
-            if (item.size && item.size !== '-') sizes.add(Utils.escapeHTML(item.size));
-        });
-
+        const parsedItems = orderData.orderItem.map(raw => new OrderItem(raw));
+        this.groups = Utils.groupBy(parsedItems, 'lineAgg');
         this.lineAggKeys = Object.keys(this.groups);
+
+        const sizes = new Set(parsedItems
+            .map(item => item.size)
+            .filter(size => size && size !== '-')
+            .map(Utils.escapeHTML)
+        );
         this.sortedSizes = Array.from(sizes).sort(Utils.compareSizes);
     }
 
@@ -53,7 +59,9 @@ export class AppState {
         return this.lineAggKeys.slice(start, start + this.itemsPerPage);
     }
 
-    get totalPages() { return Math.ceil(this.lineAggKeys.length / this.itemsPerPage); }
+    get totalPages() {
+        return Math.ceil(this.lineAggKeys.length / this.itemsPerPage);
+    }
 
     ensureConfig(lineAgg, items) {
         if (this.tableConfigs[lineAgg]) return;
@@ -78,21 +86,7 @@ export class UIController {
         this.state.container.innerHTML = '';
 
         if (this.state.currentView !== 'summary') {
-            const topControlsWrap = Utils.el('div', {
-                className: 'top-controls-wrapper',
-                style: { display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '20px' }
-            });
-
-            this._renderSettings(topControlsWrap);
-
-            const valWrap = Utils.el('div', { className: 'global-validation-container', style: { flex: '1 1 40%', overflowX: 'auto' } });
-            topControlsWrap.appendChild(valWrap);
-
-            // Gather all items globally for the single validation table
-            const allItems = Object.values(this.state.groups).flat();
-            new ValidationUI().render(allItems, valWrap);
-
-            this.state.container.appendChild(topControlsWrap);
+            this._renderTopControls();
         }
 
         const uid = Utils.escapeHTML(this.state.orderData.__metadata?.uid || 'Unknown');
@@ -102,7 +96,30 @@ export class UIController {
         });
         this.state.container.appendChild(wrapper);
 
-        const viewRenderers = {
+        this._renderActiveView(wrapper);
+        this._renderExportButton();
+    }
+
+    _renderTopControls() {
+        const topControlsWrap = Utils.el('div', {
+            className: 'top-controls-wrapper',
+            style: { display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '20px' }
+        });
+
+        this._renderSettings(topControlsWrap);
+
+        const valWrap = Utils.el('div', { className: 'global-validation-container', style: { flex: '1 1 40%', overflowX: 'auto' } });
+        topControlsWrap.appendChild(valWrap);
+
+        const allItems = Object.values(this.state.groups).flat();
+        // Pass state into ValidationUI so it can save weight updates
+        new ValidationUI(this.state).render(allItems, valWrap);
+
+        this.state.container.appendChild(topControlsWrap);
+    }
+
+    _renderActiveView(wrapper) {
+        const views = {
             summary: () => this._renderSummary(wrapper),
             all: () => this._renderAggregators(this.state.lineAggKeys, wrapper),
             paginated: () => {
@@ -110,15 +127,25 @@ export class UIController {
                 this._renderPagination(wrapper);
             }
         };
-        viewRenderers[this.state.currentView]();
+        views[this.state.currentView]();
+    }
 
+    // NEW: Robust Export Logic
+
+    _renderExportButton() {
         const onLastPage = this.state.currentPage === this.state.totalPages || this.state.totalPages === 0;
         if (this.state.currentView === 'all' || (this.state.currentView === 'paginated' && onLastPage)) {
-            const btn = Utils.el('button', { className: 'pack-btn global-export-btn', html: 'Export All to JSON' });
-            btn.onclick = () => OrderExporter.extractToJson(this.state.orderData);
+            const btn = Utils.el('button', { className: 'pack-btn global-export-btn', html: 'Log JSON to Console' });
+
+            // Pass the entire AppState to the exporter to keep things separated
+            btn.onclick = () => {
+                OrderExporter.extractToJson(this.state);
+            };
+
             this.state.container.appendChild(btn);
         }
     }
+
 
     _renderSettings(parentContainer) {
         const wrap = Utils.el('div', { className: 'global-settings', style: { flex: '1 1 50%' } });
@@ -195,6 +222,8 @@ export class UIController {
 
     _buildDataTable(items) {
         const wrapper = Utils.el('div', { className: 'original-table-wrapper' });
+        const headers = ['Size', 'Seq #', 'Ship Mode', 'Status', 'Qty', 'Mfg Size', 'Up Var', 'Low Var'];
+
         const rows = items.map(i => `
             <tr>
                 <td>${Utils.escapeHTML(i.size)}</td>
@@ -206,14 +235,12 @@ export class UIController {
                 <td>${Utils.escapeHTML(i.vr.upperVariance)}</td>
                 <td>${Utils.escapeHTML(i.vr.lowerVariance)}</td>
             </tr>
-        `).join('');
+        `);
 
-        wrapper.appendChild(Utils.el('table', {
-            html: `
-                <thead><tr><th>Size</th><th>Seq #</th><th>Ship Mode</th><th>Status</th><th>Qty</th><th>Mfg Size</th><th>Up Var</th><th>Low Var</th></tr></thead>
-                <tbody>${rows}<tr class="total-row"><td colspan="4"><strong>TOTAL</strong></td><td><strong>${items.reduce((s, i) => s + i.qty, 0)}</strong></td></tr></tbody>
-            `
-        }));
+        const totalQty = items.reduce((s, i) => s + i.qty, 0);
+        const footer = `<td colspan="4"><strong>TOTAL</strong></td><td><strong>${totalQty}</strong></td><td colspan="3"></td>`;
+
+        wrapper.appendChild(Utils.buildTable(headers, rows, footer));
         return wrapper;
     }
 
@@ -256,22 +283,25 @@ export class PackingUI {
     }
 
     _getBatches() {
-        const unique = new Set();
+        const uniqueSizes = new Set();
         const batches = [];
+
         this.items.forEach(i => {
             if (isNaN(i.qty) || i.qty <= 0 || i.size === '-') return;
             const size = Utils.escapeHTML(i.size);
-            unique.add(size);
+            uniqueSizes.add(size);
 
-            const existing = batches.find(b => !b.some(x => x.size === size));
+            const existingBatch = batches.find(b => !b.some(x => x.size === size));
             const data = { size, qty: i.qty, seqNo: Utils.escapeHTML(i.id.ItemSequenceNumber) };
-            existing ? existing.push(data) : batches.push([data]);
+            existingBatch ? existingBatch.push(data) : batches.push([data]);
         });
-        return { sizes: Array.from(unique).sort(Utils.compareSizes), batches };
+
+        return { sizes: Array.from(uniqueSizes).sort(Utils.compareSizes), batches };
     }
 
     _getHTML(sizes, batches, maxQtyMap) {
         let rows = '', cartonNo = 1;
+        const currentPackingLines = []; // Capture structural data for the exporter
 
         batches.forEach(batch => {
             batch.sort((a, b) => Utils.compareSizes(a.size, b.size)).forEach(({ size, qty, seqNo }) => {
@@ -282,6 +312,16 @@ export class PackingUI {
                 const rem = qty % max;
 
                 const makeRow = (lbl, val, cnt) => {
+                    // Save data for the JSON exporter
+                    currentPackingLines.push({
+                        cartonLabel: lbl,
+                        size: size,
+                        qtyPerCarton: val,
+                        cartonCount: cnt,
+                        sequenceNumber: seqNo,
+                        totalShipmentQty: cnt * val
+                    });
+
                     const cells = sizes.map(s => s === size ? `<td><input type="text" value="${val}" class="transparent-input" data-seq="${seqNo}" readonly></td>` : '<td></td>').join('');
                     return `<tr><td><strong>${lbl}</strong></td>
                     ${cells}<td>${cnt}</td>
@@ -291,14 +331,17 @@ export class PackingUI {
 
                 if (full > 0) {
                     const end = cartonNo + full - 1;
-                    rows += makeRow(cartonNo === end ? cartonNo : `${cartonNo}-${end}`, max, full);
+                    rows += makeRow(cartonNo === end ? String(cartonNo) : `${cartonNo}-${end}`, max, full);
                     cartonNo = end + 1;
                 }
                 if (rem > 0) {
-                    rows += makeRow(cartonNo++, rem, 1);
+                    rows += makeRow(String(cartonNo++), rem, 1);
                 }
             });
         });
+
+        // Save generated lines to state
+        this.state.packingData[this.lineAgg] = currentPackingLines;
 
         return `
             <table class="packing-table">
@@ -319,62 +362,75 @@ export class PackingUI {
             const val = parseInt(e.target.value, 10);
             if (val > 0) {
                 this.state.tableConfigs[this.lineAgg].maxQtyMap[e.target.dataset.size] = val;
-                this.render();
+                this.render(); // This recalculates and overwrites `state.packingData` automatically!
             }
         }));
     }
 }
 
 export class ValidationUI {
+    constructor(state) {
+        this.state = state;
+    }
+
     async render(items, container) {
         container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Fetching...</div>';
         const catalog = await ApiClient.fetchBulkCatalog();
         const buyers = [...new Set(items.map(i => i.buyerNumber).filter(Boolean))];
 
-        // Grab the common Buyer Number for the header (first one found)
         const mainBuyerNumber = buyers.length > 0 ? buyers[0] : 'Unknown';
-
         const catalogItems = catalog?.item || catalog?.result || catalog || [];
 
-        // Prepare list of all display sizes (used in default settings box)
         const allDisplaySizes = [...new Set(
             items.map(i => i.size).filter(s => s && s !== '-')
         )].sort(Utils.compareSizes);
 
-        let rows = '';
-        buyers.forEach(bNum => {
-            // Cast to string for reliable comparison
-            const found = catalogItems.filter(c => String(c.itemAttribute?.buyerItemNumber) === String(bNum));
+        const rows = this._buildValidationRows(buyers, catalogItems, items, allDisplaySizes);
+        const headers = ['Listed Size', 'Net Weight'];
 
-            // If no catalog data for this buyer, use all display sizes as required sizes
+        container.innerHTML = `<h4>Catalog Verification (Buyer No: ${Utils.escapeHTML(mainBuyerNumber)})</h4>`;
+        container.appendChild(Utils.buildTable(headers, rows, '', 'validation-table'));
+
+        // Attach listeners to grab the user's manual weight changes!
+        container.querySelectorAll('.val-weight-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const size = e.target.dataset.size;
+                this.state.validationWeights[size] = e.target.value;
+            });
+        });
+    }
+
+    _buildValidationRows(buyers, catalogItems, items, allDisplaySizes) {
+        let rows = [];
+
+        buyers.forEach(bNum => {
+            const found = catalogItems.filter(c => String(c.itemAttribute?.buyerItemNumber) === String(bNum));
             const reqSizes = found.length
                 ? [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))]
                 : allDisplaySizes;
 
             reqSizes.forEach(size => {
-                // For missing catalog, catalogItem will be undefined
                 const catalogItem = found.length
                     ? found.find(c => String(c.itemAttribute?.ManufacturingSize) === String(size))
                     : null;
                 const ok = !!catalogItem;
                 const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
 
-                rows += `<tr class="${ok ? 'success-text' : 'error-text'}">
-                    <td>${Utils.escapeHTML(size)}</td>
-                    <td><input type="number" step="0.01" class="val-weight-input" value="${Utils.escapeHTML(netWeight)}" placeholder="Weight"></td>
-                </tr>`;
+                // Seed initial state so default weights show up in JSON even without user editing
+                if (!this.state.validationWeights[size]) {
+                    this.state.validationWeights[size] = netWeight;
+                }
+
+                // Add data-size to input so the listener knows which size was updated
+                rows.push(`
+                    <tr class="${ok ? 'success-text' : 'error-text'}">
+                        <td>${Utils.escapeHTML(size)}</td>
+                        <td><input type="number" step="0.01" class="val-weight-input" data-size="${Utils.escapeHTML(size)}" value="${Utils.escapeHTML(this.state.validationWeights[size])}" placeholder="Weight"></td>
+                    </tr>
+                `);
             });
         });
 
-        container.innerHTML = `<h4>Catalog Verification (Buyer No: ${Utils.escapeHTML(mainBuyerNumber)})</h4>
-        <table class="validation-table">
-            <thead>
-                <tr>
-                    <th>Listed Size</th>
-                    <th>Net Weight</th>
-                </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-        </table>`;
+        return rows;
     }
 }

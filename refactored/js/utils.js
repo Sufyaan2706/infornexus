@@ -39,4 +39,22 @@ export class Utils {
         if (style) Object.assign(node.style, style);
         return node;
     }
+
+    // --- NEW MODULAR HELPERS ---
+
+    static groupBy(array, keyProp) {
+        return array.reduce((acc, item) => {
+            const key = item[keyProp];
+            if (key !== undefined) {
+                (acc[key] = acc[key] || []).push(item);
+            }
+            return acc;
+        }, {});
+    }
+
+    static buildTable(headers, bodyRows, footerRow = '', className = '') {
+        const headHtml = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+        const bodyHtml = `<tbody>${bodyRows.join('')}${footerRow ? `<tr class="total-row">${footerRow}</tr>` : ''}</tbody>`;
+        return this.el('table', { className, html: headHtml + bodyHtml });
+    }
 }
