@@ -34,7 +34,6 @@ export class AppState {
         this.globalMaxMap = {};
         this.sortedSizes = [];
 
-        // MOQ properties
         this.moqValue = 8;
         this.globalSizeTotals = {};
     }
@@ -90,7 +89,6 @@ export class AppState {
 
         const existing = this.tableConfigs[lineAgg];
 
-        // If a config already exists, prune any sizes that are no longer valid, then return.
         if (existing) {
             Object.keys(existing.maxQtyMap).forEach(size => {
                 if (!validSizes.has(size)) delete existing.maxQtyMap[size];
@@ -98,7 +96,6 @@ export class AppState {
             return;
         }
 
-        // No config yet — create one from scratch using globalMaxMap defaults.
         const maxQtyMap = {};
         validSizes.forEach(size => {
             maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
@@ -152,8 +149,6 @@ export class UIController {
         moqBar.querySelector('#apply-moq-btn').onclick = () => {
             const val = parseInt(document.getElementById('moq-input').value, 10);
             this.state.moqValue = isNaN(val) ? 0 : val;
-            // Clear all cached configs so ensureConfig rebuilds them
-            // against the newly filtered item sets.
             this.state.tableConfigs = {};
             this.state.load(this.state.orderData, this.state.container);
             this.render();
@@ -161,7 +156,6 @@ export class UIController {
 
         topControlsWrap.appendChild(moqBar);
 
-        // Container for Max Qty settings and Validation
         const settingsFlex = Utils.el('div', { style: { display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' } });
 
         this._renderSettings(settingsFlex);
@@ -491,12 +485,10 @@ export class ValidationUI {
                 const ok = !!catalogItem;
                 const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
 
-                // Seed initial state so default weights show up in JSON even without user editing
                 if (!this.state.validationWeights[size]) {
                     this.state.validationWeights[size] = netWeight;
                 }
 
-                // Add data-size to input so the listener knows which size was updated
                 rows.push(`
                     <tr class="${ok ? 'success-text' : 'error-text'}">
                         <td>${Utils.escapeHTML(size)}</td>
