@@ -454,13 +454,15 @@ export class ValidationUI {
             items.map(i => i.size).filter(s => s && s !== '-')
         )].sort(Utils.compareSizes);
 
+        // Updated _buildValidationRows will now return 3 cells per row
         const rows = this._buildValidationRows(buyers, catalogItems, items, allDisplaySizes);
-        const headers = ['Listed Size', 'Net Weight'];
+
+        // Added 'Item Key' to headers
+        const headers = ['Item Key', 'Listed Size', 'Net Weight'];
 
         container.innerHTML = `<h4>Catalog Verification (Buyer No: ${Utils.escapeHTML(mainBuyerNumber)})</h4>`;
         container.appendChild(Utils.buildTable(headers, rows, '', 'validation-table'));
 
-        // Attach listeners to grab the user's manual weight changes!
         container.querySelectorAll('.val-weight-input').forEach(input => {
             input.addEventListener('change', (e) => {
                 const size = e.target.dataset.size;
@@ -482,7 +484,11 @@ export class ValidationUI {
                 const catalogItem = found.length
                     ? found.find(c => String(c.itemAttribute?.ManufacturingSize) === String(size))
                     : null;
+
                 const ok = !!catalogItem;
+
+                // Extract itemKey if it exists (checks top-level and itemAttribute)
+                const itemKey = catalogItem?.itemKey || catalogItem?.itemAttribute?.itemKey || '-';
                 const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
 
                 if (!this.state.validationWeights[size]) {
@@ -491,6 +497,7 @@ export class ValidationUI {
 
                 rows.push(`
                     <tr class="${ok ? 'success-text' : 'error-text'}">
+                        <td>${Utils.escapeHTML(itemKey)}</td>
                         <td>${Utils.escapeHTML(size)}</td>
                         <td><input type="number" step="0.01" class="val-weight-input" data-size="${Utils.escapeHTML(size)}" value="${Utils.escapeHTML(this.state.validationWeights[size])}" placeholder="Weight"></td>
                     </tr>
