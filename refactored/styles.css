@@ -1,4 +1,4 @@
-/* ─── Base Typography & Global ──────────────────────────────────────────────── */
+/* Base Typography & Global */
 
 h1 {
     text-align: center;
@@ -33,7 +33,7 @@ img {
     height: 50px;
 }
 
-/* ─── Base Table ─────────────────────────────────────────────────────────────── */
+/* Base Table */
 
 table {
     font-family: Arial, Helvetica, sans-serif;
@@ -66,7 +66,7 @@ th {
     color: white;
 }
 
-/* ─── Utility ────────────────────────────────────────────────────────────────── */
+/* Utility */
 
 .error,
 .empty-pack-msg {
@@ -98,7 +98,7 @@ th {
     font-weight: bold;
 }
 
-/* ─── Search Bar ─────────────────────────────────────────────────────────────── */
+/* Search Bar */
 
 .search-bar {
     position: fixed;
@@ -107,7 +107,7 @@ th {
     padding: 10px;
 }
 
-/* ─── Sections ───────────────────────────────────────────────────────────────── */
+/* Sections */
 
 .order-section {
     margin-bottom: 40px;
@@ -129,13 +129,12 @@ th {
     padding-bottom: 8px;
 }
 
-/* ─── 3-Panel Layout (Paginated / All view) ──────────────────────────────────
+/* 3-Panel Layout (Paginated / All view)
    On a 1920px screen the three panels sit side-by-side in one row:
      • original-table-wrapper  — the raw order data   (flex: 2)
      • packing-container       — packing table         (flex: 3)
      • validation-container    — catalog verification  (flex: 1.5)
-   Narrower screens fall back gracefully via column wrapping.
-──────────────────────────────────────────────────────────────────────────── */
+   Narrower screens fall back gracefully via column wrapping. */
 
 .tables-container {
     display: flex;
@@ -200,7 +199,7 @@ th {
     font-size: 13px;
 }
 
-/* ─── Packing Table ──────────────────────────────────────────────────────────── */
+/* Packing Table */
 
 .packing-table {
     font-size: 13px;
@@ -231,7 +230,7 @@ th {
     white-space: nowrap;
 }
 
-/* ─── Inputs ─────────────────────────────────────────────────────────────────── */
+/* Inputs */
 
 .max-qty-header-input,
 .weight-header-input {
@@ -263,7 +262,7 @@ th {
     background-color: #fafafa;
 }
 
-/* ─── Verification Table ─────────────────────────────────────────────────────── */
+/* Verification Table */
 
 .verification-table {
     font-size: 13px;
@@ -306,7 +305,7 @@ th {
     font-size: 13px;
 }
 
-/* ─── Global Settings Panel ──────────────────────────────────────────────────── */
+/* Global Settings Panel */
 
 .top-controls-wrapper {
     margin-bottom: 20px;
@@ -382,7 +381,7 @@ th {
     margin-top: 15px;
 }
 
-/* ─── Buttons ────────────────────────────────────────────────────────────────── */
+/* Buttons */
 
 .pack-btn {
     margin-top: 10px;
@@ -431,7 +430,7 @@ th {
     font-size: 14px;
 }
 
-/* ─── View Controls ──────────────────────────────────────────────────────────── */
+/* View Controls */
 
 .view-controls {
     display: inline-flex;
@@ -441,7 +440,7 @@ th {
     margin-bottom: 10px;
 }
 
-/* ─── Pagination ─────────────────────────────────────────────────────────────── */
+/* Pagination */
 
 .pagination-controls {
     display: flex;
@@ -465,10 +464,7 @@ th {
     font-weight: bold;
 }
 
-/* ─── Summary View Grid ──────────────────────────────────────────────────────
-   Miniaturised cards in a responsive grid.
-   1920px → 3 columns, 1400px → 2 columns, <900px → 1 column.
-──────────────────────────────────────────────────────────────────────────── */
+/* Summary View Grid */
 
 .summary-view-container {
     display: grid;

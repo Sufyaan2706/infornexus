@@ -23,10 +23,6 @@ export class AppState {
         this.groups = {};
         this.lineAggKeys = [];
         this.tableConfigs = {};
-
-        this.packingData = {};
-        this.validationWeights = {};
-
         this.currentView = 'paginated';
         this.currentPage = 1;
         this.itemsPerPage = 5;
@@ -159,12 +155,6 @@ export class UIController {
         const settingsFlex = Utils.el('div', { style: { display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' } });
 
         this._renderSettings(settingsFlex);
-
-        const valWrap = Utils.el('div', { className: 'global-validation-container', style: { flex: '1 1 40%', overflowX: 'auto' } });
-        settingsFlex.appendChild(valWrap);
-
-        const allItems = Object.values(this.state.groups).flat();
-        new ValidationUI(this.state).render(allItems, valWrap);
 
         topControlsWrap.appendChild(settingsFlex);
         this.state.container.appendChild(topControlsWrap);
@@ -437,67 +427,3 @@ export class PackingUI {
     }
 }
 
-export class ValidationUI {
-    constructor(state) {
-        this.state = state;
-    }
-
-    async render(items, container) {
-        container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Fetching...</div>';
-        const catalog = await ApiClient.fetchBulkCatalog();
-        const buyers = [...new Set(items.map(i => i.buyerNumber).filter(Boolean))];
-
-        const mainBuyerNumber = buyers.length > 0 ? buyers[0] : 'Unknown';
-        const catalogItems = catalog?.item || catalog?.result || catalog || [];
-
-        const allDisplaySizes = [...new Set(
-            items.map(i => i.size).filter(s => s && s !== '-')
-        )].sort(Utils.compareSizes);
-
-        const rows = this._buildValidationRows(buyers, catalogItems, items, allDisplaySizes);
-        const headers = ['Listed Size', 'Net Weight'];
-
-        container.innerHTML = `<h4>Catalog Verification (Buyer No: ${Utils.escapeHTML(mainBuyerNumber)})</h4>`;
-        container.appendChild(Utils.buildTable(headers, rows, '', 'validation-table'));
-
-        // Attach listeners to grab the user's manual weight changes!
-        container.querySelectorAll('.val-weight-input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const size = e.target.dataset.size;
-                this.state.validationWeights[size] = e.target.value;
-            });
-        });
-    }
-
-    _buildValidationRows(buyers, catalogItems, items, allDisplaySizes) {
-        let rows = [];
-
-        buyers.forEach(bNum => {
-            const found = catalogItems.filter(c => String(c.itemAttribute?.buyerItemNumber) === String(bNum));
-            const reqSizes = found.length
-                ? [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))]
-                : allDisplaySizes;
-
-            reqSizes.forEach(size => {
-                const catalogItem = found.length
-                    ? found.find(c => String(c.itemAttribute?.ManufacturingSize) === String(size))
-                    : null;
-                const ok = !!catalogItem;
-                const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
-
-                if (!this.state.validationWeights[size]) {
-                    this.state.validationWeights[size] = netWeight;
-                }
-
-                rows.push(`
-                    <tr class="${ok ? 'success-text' : 'error-text'}">
-                        <td>${Utils.escapeHTML(size)}</td>
-                        <td><input type="number" step="0.01" class="val-weight-input" data-size="${Utils.escapeHTML(size)}" value="${Utils.escapeHTML(this.state.validationWeights[size])}" placeholder="Weight"></td>
-                    </tr>
-                `);
-            });
-        });
-
-        return rows;
-    }
-}
