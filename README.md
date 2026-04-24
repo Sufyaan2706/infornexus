@@ -173,5 +173,5 @@ ISC License - See package.json for details
 
 For issues and feature requests, please visit [GitHub Issues](https://github.com/Sufyaan2706/infornexus/issues)
 
----
+--- from the Intern
 
