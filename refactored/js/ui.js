@@ -95,10 +95,99 @@ export class AppState {
             });
             return;
         }
+    });
 
-        const maxQtyMap = {};
-        validSizes.forEach(size => {
-            maxQtyMap[size] = this.globalMaxMap[size] > 0 ? this.globalMaxMap[size] : 50;
+    const sortedGlobalSizes = Array.from(allUniqueSizes).sort(compareSizes);
+    const lineAggKeys = Object.keys(groups);
+
+    // ── Global Settings Panel ────────────────────────────────────────
+    const globalSettings = document.createElement('div');
+    globalSettings.className = 'global-settings';
+
+    const headerTitle = document.createElement('h3');
+    headerTitle.innerText = "Default Settings Per Size";
+    globalSettings.appendChild(headerTitle);
+
+    const sizesContainer = document.createElement('div');
+    sizesContainer.className = 'global-sizes-container';
+
+    sortedGlobalSizes.forEach(size => {
+        const sizeBlock = document.createElement('div');
+        sizeBlock.className = 'global-size-block';
+        sizeBlock.innerHTML = `
+            <strong>${size}</strong>
+            <div class="input-group input-group-margin">
+                Max Qty: <br>
+                <input type="number" class="global-max-qty" data-size="${size}" value="50" min="1">
+            </div>
+            <div class="input-group">
+                Weight: <br>
+                <input type="number" class="global-weight" data-size="${size}" step="0.1" min="0" placeholder="0.0">
+            </div>
+        `;
+        sizesContainer.appendChild(sizeBlock);
+    });
+
+    const applyBtnBlock = document.createElement('div');
+    applyBtnBlock.className = 'global-apply-block';
+    applyBtnBlock.innerHTML = `<button id="apply-globals-btn" class="pack-btn">Apply Defaults to All Tables</button>`;
+
+    globalSettings.appendChild(sizesContainer);
+    globalSettings.appendChild(applyBtnBlock);
+    containerElement.appendChild(globalSettings);
+
+    // ── Order heading ─────────────────────────────────────────────────
+    const orderHeading = document.createElement('h2');
+    orderHeading.className = 'order-heading';
+    orderHeading.innerHTML = `Order Details (UID: <span class="uid-text">${escapeHTML(orderData.__metadata?.uid || 'Unknown')}</span>)`;
+    containerElement.appendChild(orderHeading);
+
+    // One button per LineAggregator — clicking it shows that page
+    const navBlock = document.createElement('div');
+    navBlock.className = 'line-agg-nav';
+
+    const navLabel = document.createElement('span');
+    navLabel.className = 'line-agg-nav-label';
+    navLabel.innerText = 'Line Aggregator:';
+    navBlock.appendChild(navLabel);
+
+    const navBtnsContainer = document.createElement('div');
+    navBtnsContainer.className = 'line-agg-nav-btns';
+    navBlock.appendChild(navBtnsContainer);
+
+    containerElement.appendChild(navBlock);
+
+  
+    // Holds all LineAggregator pages; only one visible at a time
+    const pagesContainer = document.createElement('div');
+    pagesContainer.className = 'line-agg-pages';
+    containerElement.appendChild(pagesContainer);
+
+    // ── Helper: show a specific page 
+    function showPage(targetLineAgg) {
+        // Hide all pages
+        pagesContainer.querySelectorAll('.line-agg-page').forEach(page => {
+            page.style.display = 'none';
+        });
+
+        // Show the target page
+        const targetPage = pagesContainer.querySelector(`[data-line-agg="${CSS.escape(targetLineAgg)}"]`);
+        if (targetPage) targetPage.style.display = 'block';
+
+        // Update active button
+        navBtnsContainer.querySelectorAll('.line-agg-nav-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-line-agg') === targetLineAgg);
+        });
+    }
+
+    const getGlobalMaps = () => {
+        const maxMap = {};
+        const wMap = {};
+        document.querySelectorAll('.global-max-qty').forEach(input => {
+            maxMap[input.getAttribute('data-size')] = parseInt(input.value, 10) || 50;
+        });
+        document.querySelectorAll('.global-weight').forEach(input => {
+            wMap[input.getAttribute('data-size')] = input.value;
         });
         this.tableConfigs[lineAgg] = { maxQtyMap };
     }
@@ -109,12 +198,28 @@ export class UIController {
         this.state = state;
     }
 
-    render() {
-        this.state.container.innerHTML = '';
+    // ── Build each LineAggregator page
+    lineAggKeys.forEach((lineAgg, index) => {
+        const items = groups[lineAgg];
+        let totalQty = 0;
 
-        if (this.state.currentView !== 'summary') {
-            this._renderTopControls();
-        }
+        // Nav button
+        const navBtn = document.createElement('button');
+        navBtn.className = 'line-agg-nav-btn pack-btn';
+        navBtn.setAttribute('data-line-agg', lineAgg);
+        navBtn.innerText = lineAgg;
+        navBtn.addEventListener('click', () => showPage(lineAgg));
+        navBtnsContainer.appendChild(navBtn);
+
+        // Page div — each LineAggregator lives in its own page
+        const page = document.createElement('div');
+        page.className = 'line-agg-page';
+        page.setAttribute('data-line-agg', lineAgg);
+        page.style.display = 'none'; // hidden until nav button clicked
+
+        const lineAggSection = document.createElement('div');
+        lineAggSection.className = 'line-agg-section';
+        lineAggSection.innerHTML = `<h3>Line Aggregator: ${escapeHTML(lineAgg)}</h3>`;
 
         const uid = Utils.escapeHTML(this.state.orderData.__metadata?.uid || 'Unknown');
         const wrapper = Utils.el('div', {
@@ -127,10 +232,42 @@ export class UIController {
         this._renderExportButton();
     }
 
-    _renderTopControls() {
-        const topControlsWrap = Utils.el('div', {
-            className: 'top-controls-wrapper',
-            style: { display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Size</th>
+                    <th>Item Sequence Number</th>
+                    <th>Ship Mode</th>
+                    <th>Item Status</th>
+                    <th>Quantity</th>
+                    <th>Upper Variance</th>
+                    <th>Lower Variance</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+
+        items.forEach((item) => {
+            const bi = item.baseItem || {};
+            const ref = bi.reference || {};
+            const id = bi.itemIdentifier || {};
+            const itemVar = bi.itemVariance || {};
+            const qty = parseFloat(bi.quantity || 0);
+            totalQty += qty;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="size">${escapeHTML(id.IdBuyerSize)}</span></td>
+                    <td><span class="description">${escapeHTML(id.ItemSequenceNumber)}</span></td>
+                    <td><span class="brand">${escapeHTML(ref.AdidasShipMode)}</span></td>
+                    <td><span class="status">${escapeHTML(ref.ItemStatus)}</span></td>
+                    <td><span class="qty">${escapeHTML(bi.quantity)}</span></td>
+                    <td><span class="qty">${escapeHTML(itemVar.upperVariance || 0)}</span></td>
+                    <td><span class="qty">${escapeHTML(itemVar.lowerVariance || 0)}</span></td>
+                </tr>
+            `;
         });
 
         // MOQ Settings Bar
@@ -183,10 +320,11 @@ export class UIController {
     }
 
 
-    _renderExportButton() {
-        const onLastPage = this.state.currentPage === this.state.totalPages || this.state.totalPages === 0;
-        if (this.state.currentView === 'all' || (this.state.currentView === 'paginated' && onLastPage)) {
-            const btn = Utils.el('button', { className: 'pack-btn global-export-btn', html: 'Log JSON to Console' });
+        tablesContainer.appendChild(originalTableWrapper);
+        tablesContainer.appendChild(packingContainer);
+        lineAggSection.appendChild(tablesContainer);
+        page.appendChild(lineAggSection);
+        pagesContainer.appendChild(page);
 
             btn.onclick = () => {
                 OrderExporter.extractToJson(this.state);
@@ -215,23 +353,16 @@ export class UIController {
             }));
         });
 
-        const applyBtn = Utils.el('button', { className: 'pack-btn', html: 'Apply Defaults' });
-        applyBtn.onclick = () => {
-            document.querySelectorAll('.global-max-qty').forEach(i => this.state.globalMaxMap[i.dataset.size] = parseInt(i.value, 10));
-            (this.state.currentView === 'all' ? this.state.lineAggKeys : this.state.paginatedKeys)
-                .forEach(k => delete this.state.tableConfigs[k]);
-            this.render();
-        };
-
-        wrap.append(grid, Utils.el('div', { className: 'global-apply-block' }).appendChild(applyBtn).parentNode);
-        parentContainer.appendChild(wrap);
+    // Show the first LineAggregator page by default
+    if (lineAggKeys.length > 0) {
+        showPage(lineAggKeys[0]);
     }
 
-    _renderSummary(wrapper) {
-        // Global Totals Indicator Header
-        const statsHeader = Utils.el('div', {
-            className: 'global-stats-summary',
-            style: { marginBottom: '20px', padding: '15px', border: '1px solid #ddd', background: '#f9f9f9', borderRadius: '4px' }
+    // Apply Defaults button
+    const applyBtn = document.getElementById('apply-globals-btn');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+            renderTriggers.forEach(trigger => trigger());
         });
 
         let statsHtml = '<h4 style="margin-top:0;">Global Size Totals (All Aggregators)</h4><div style="display: flex; gap: 10px; flex-wrap: wrap;">';
@@ -272,14 +403,25 @@ export class UIController {
         wrapper.appendChild(container);
     }
 
-    _renderAggregators(keys, wrapper) {
-        keys.forEach(agg => {
-            const items = this.state.groups[agg];
-            const section = Utils.el('div', { className: 'line-agg-section' });
-            section.appendChild(Utils.el('h3', { html: `Line Aggregator: ${Utils.escapeHTML(agg)}` }));
+    // Export button
+    const globalExportBtn = document.createElement('button');
+    globalExportBtn.className = 'pack-btn global-export-btn';
+    globalExportBtn.innerText = 'Export All to JSON';
+    globalExportBtn.onclick = () => extractOrderDataToJson(orderData);
+    
+    containerElement.appendChild(globalExportBtn);
 
-            const tables = Utils.el('div', { className: 'tables-container' });
-            tables.appendChild(this._buildDataTable(items));
+    // ── Summary button
+    const summaryBtn = document.createElement('button');
+    summaryBtn.className = 'pack-btn summary-btn';
+    summaryBtn.style.backgroundColor = '#1E3A5F'; 
+    summaryBtn.style.marginRight = '10px';
+    summaryBtn.innerText = 'View Changes Summary';
+    
+    summaryBtn.onclick = () => showSummaryModal(containerElement);
+    containerElement.appendChild(summaryBtn);
+
+}
 
             const packWrap = Utils.el('div', { className: 'packing-container', id: `packing-${agg.replace(/\W/g, '_')}` });
             new PackingUI(this.state, items, packWrap, agg).build();
@@ -352,56 +494,78 @@ export class PackingUI {
         this._attachListeners();
     }
 
-    _getBatches() {
-        const uniqueSizes = new Set();
-        const batches = [];
+    const sizes = Array.from(uniqueSizes).sort(compareSizes);
 
-        this.items.forEach(i => {
-            if (isNaN(i.qty) || i.qty <= 0 || i.size === '-') return;
-            const size = Utils.escapeHTML(i.size);
-            uniqueSizes.add(size);
+    let html = `
+        <table class="packing-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">CTN NO</th>
+                    <th colspan="${sizes.length}">SIZE</th>
+                    <th rowspan="2">TOTAL CTNS</th>
+                    <th rowspan="2">SHIPMENT QNTY</th>
+                </tr>
+                <tr>
+                    ${sizes.map(s => `<th>${s}</th>`).join('')}
+                </tr>
+                <tr class="input-row">
+                    <td colspan="1" class="input-label">Input max quantity per box:</td>
+                    ${sizes.map(s => `
+                        <td>
+                            <input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" placeholder="Qty" min="1">
+                        </td>
+                    `).join('')}
+                    <td colspan="2"></td>
+                </tr>
+                <tr class="input-row">
+                    <td colspan="1" class="input-label">Input weight</td>
+                    ${sizes.map(s => `
+                        <td>
+                            <input type="number" class="weight-header-input" data-size="${s}" min="0" step="0.1" placeholder="0.0" value="${weightMap[s] || ''}">
+                        </td>
+                    `).join('')}
+                    <td colspan="2"></td>
+                </tr>
+            </thead>
+            <tbody>
+    `;
 
-            const existingBatch = batches.find(b => !b.some(x => x.size === size));
-            const data = { size, qty: i.qty, seqNo: Utils.escapeHTML(i.id.ItemSequenceNumber) };
-            existingBatch ? existingBatch.push(data) : batches.push([data]);
-        });
+    let cartonNo = 1;
 
-        return { sizes: Array.from(uniqueSizes).sort(Utils.compareSizes), batches };
-    }
+    batches.forEach(batch => {
+        batch.sort((a, b) => compareSizes(a.size, b.size));
 
-    _getHTML(sizes, batches, maxQtyMap) {
-        let rows = '', cartonNo = 1;
-        const currentPackingLines = []; // Capture structural data for the exporter
+        batch.forEach(item => {
+            const currentSize = item.size;
+            let remainingQty = item.qty;
+            const maxQty = maxQtyMap[currentSize];
 
-        batches.forEach(batch => {
-            batch.sort((a, b) => Utils.compareSizes(a.size, b.size)).forEach(({ size, qty, seqNo }) => {
-                const max = maxQtyMap[size];
-                if (!max || max <= 0) return;
+            if (maxQty && maxQty > 0) {
+                const fullCartons = Math.floor(remainingQty / maxQty);
+                const remainder = remainingQty % maxQty;
 
-                const full = Math.floor(qty / max);
-                const rem = qty % max;
+                if (fullCartons > 0) {
+                    const startCtn = cartonNo;
+                    const endCtn = cartonNo + fullCartons - 1;
+                    const ctnString = startCtn === endCtn ? `${startCtn}` : `${startCtn}-${endCtn}`;
 
-                const makeRow = (lbl, val, cnt) => {
-                    currentPackingLines.push({
-                        cartonLabel: lbl,
-                        size: size,
-                        qtyPerCarton: val,
-                        cartonCount: cnt,
-                        sequenceNumber: seqNo,
-                        totalShipmentQty: cnt * val
+                    let rowHtml = `<tr><td class="bold-text">${ctnString}</td>`;
+                    sizes.forEach(s => {
+                        rowHtml += `<td>${s === currentSize ? `<input type="text" value="${maxQty}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}</td>`;
                     });
+                    rowHtml += `<td class="highlight-cell">${fullCartons}</td><td class="highlight-cell">${fullCartons * maxQty}</td></tr>`;
+                    html += rowHtml;
+                    cartonNo = endCtn + 1;
+                }
 
-                    const cells = sizes.map(s => s === size ? `<td><input type="text" value="${val}" class="transparent-input" data-seq="${seqNo}" readonly></td>` : '<td></td>').join('');
-                    return `<tr><td><strong>${lbl}</strong></td>
-                    ${cells}<td>${cnt}</td>
-                    <td>${seqNo}</td>
-                    <td>${cnt * val}</td></tr>`;
-                };
-
-                if (full > 0) {
-                    const end = cartonNo + full - 1;
-                    rows += makeRow(cartonNo === end ? String(cartonNo) : `${cartonNo}-${end}`, max, full);
-                    cartonNo = end + 1;
+                if (remainder > 0) {
+                    let rowHtml = `<tr><td class="bold-text">${cartonNo}</td>`;
+                    sizes.forEach(s => {
+                        rowHtml += `<td>${s === currentSize ? `<input type="text" value="${remainder}" class="transparent-input" data-seq="${item.seqNo}" readonly>` : ''}</td>`;
+                    });
+                    rowHtml += `<td class="highlight-cell">1</td><td class="highlight-cell">${remainder}</td></tr>`;
+                    html += rowHtml;
+                    cartonNo++;
                 }
                 if (rem > 0) {
                     rows += makeRow(String(cartonNo++), rem, 1);
@@ -497,7 +661,99 @@ export class ValidationUI {
                 `);
             });
         });
+    });
+}
 
-        return rows;
-    }
+// Generates and displays a modal with all changes made to packing settings.
+
+function showSummaryModal(container) {
+    const data = [];
+    const defaultQty = 50; // Defined in global settings 
+    const defaultWeight = "0.0";
+
+    // Select all unique sizes from the UI
+    const sizes = Array.from(new Set([...container.querySelectorAll('[data-size]')].map(el => el.getAttribute('data-size'))));
+
+    sizes.forEach(size => {
+        // Find the specific inputs for this size in the packing tables 
+        const qtyInput = container.querySelector(`.max-qty-header-input[data-size="${size}"]`);
+        const weightInput = container.querySelector(`.weight-header-input[data-size="${size}"]`);
+
+        const currentQty = qtyInput ? parseInt(qtyInput.value, 10) : defaultQty;
+        const currentWeight = weightInput ? weightInput.value : defaultWeight;
+
+        // Only track if values differ from the standard defaults
+        if (currentQty !== defaultQty || (currentWeight !== defaultWeight && currentWeight !== "")) {
+            data.push({
+                size,
+                qty: currentQty,
+                isQtyChanged: currentQty !== defaultQty,
+                weight: currentWeight || "0.0",
+                isWeightChanged: currentWeight !== defaultWeight && currentWeight !== ""
+            });
+        }
+    });
+
+    renderSummaryModal(data);
+}
+
+// Creates the Modal UI for the summary
+ 
+function renderSummaryModal(changes) {
+    // Remove existing modal if it exists
+    const existing = document.getElementById('summary-modal-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'summary-modal-overlay';
+    overlay.style = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); display: flex; align-items: center;
+        justify-content: center; z-index: 10000; font-family: sans-serif;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style = `
+        background: #fff; padding: 25px; border-radius: 8px;
+        max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    `;
+
+    let tableContent = changes.length > 0 
+        ? changes.map(c => `
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${c.size}</strong></td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; color: ${c.isQtyChanged ? '#d32f2f' : '#333'}">
+                    ${c.qty} ${c.isQtyChanged ? '<b>(Edited)</b>' : ''}
+                </td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; color: ${c.isWeightChanged ? '#d32f2f' : '#333'}">
+                    ${c.weight} ${c.isWeightChanged ? '<b>(Edited)</b>' : ''}
+                </td>
+            </tr>
+        `).join('')
+        : '<tr><td colspan="3" style="text-align:center; padding: 20px;">No changes made to defaults.</td></tr>';
+
+    modal.innerHTML = `
+        <h2 style="margin-top: 0;">Packing Changes Summary</h2>
+        <p style="color: #666; font-size: 0.9em;">Comparing current values against initial defaults (Qty: 50, Wght: 0.0).</p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left;">
+            <thead>
+                <tr style="background: #f5f5f5;">
+                    <th style="padding: 10px;">Size</th>
+                    <th style="padding: 10px;">Max Qty</th>
+                    <th style="padding: 10px;">Weight</th>
+                </tr>
+            </thead>
+            <tbody>${tableContent}</tbody>
+        </table>
+        <div style="margin-top: 25px; text-align: right;">
+            <button id="close-summary" class="pack-btn" style="background: #333;">Close</button>
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    document.getElementById('close-summary').onclick = () => overlay.remove();
+    overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
 }

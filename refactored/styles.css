@@ -407,132 +407,62 @@ th {
     font-size: 16px;
 }
 
-.nav-btn {
-    padding: 8px 12px;
-    border: 1px solid #003366;
-    background: white;
-    color: #003366;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.nav-btn.active-view {
-    background: #003366;
-    color: white;
-}
-
-.nav-input {
-    width: 50px;
-    padding: 8px;
-    border: 1px solid #003366;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 14px;
-}
-
-/* ─── View Controls ──────────────────────────────────────────────────────────── */
-
-.view-controls {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: 20px;
-    margin-bottom: 10px;
-}
-
-/* ─── Pagination ─────────────────────────────────────────────────────────────── */
-
-.pagination-controls {
+/* Navigation block — sits below the order heading */
+.line-agg-nav {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 30px 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: #f0f4f8;
+    border: 1px solid #d0d9e4;
+    border-radius: 6px;
+    margin: 16px 0;
 }
 
-.page-btn {
-    padding: 8px 15px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background: white;
-    font-size: 14px;
-    border-radius: 3px;
-}
-
-.page-btn.active-page {
-    background: #003366;
-    color: white;
+.line-agg-nav-label {
     font-weight: bold;
-}
-
-/* ─── Summary View Grid ──────────────────────────────────────────────────────
-   Miniaturised cards in a responsive grid.
-   1920px → 3 columns, 1400px → 2 columns, <900px → 1 column.
-──────────────────────────────────────────────────────────────────────────── */
-
-.summary-view-container {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    align-items: start;
-}
-
-@media (min-width: 1400px) {
-    .summary-view-container {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 900px) {
-    .summary-view-container {
-        grid-template-columns: 1fr;
-    }
-}
-
-.summary-view-container .line-agg-section {
-    margin-bottom: 0;
-    padding: 10px;
-}
-
-.summary-view-container .summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    background-color: #f4f4f4;
-    padding: 6px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.summary-view-container .summary-header h3 {
-    margin: 0;
-    color: #003366;
     font-size: 13px;
+    color: #1E3A5F;
+    margin-right: 8px;
+    white-space: nowrap;
 }
 
-/* Scale down table content to fit grid cards */
-.summary-view-container table {
-    font-size: 11px;
+.line-agg-nav-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.summary-view-container th,
-.summary-view-container td {
-    padding: 3px 4px;
+/* Each nav button */
+.line-agg-nav-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #1E3A5F;
+    border: 1px solid #2E75B6;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
 }
 
-.summary-view-container .max-qty-header-input,
-.summary-view-container .weight-header-input {
-    padding: 2px;
-    font-size: 11px;
+.line-agg-nav-btn:hover {
+    background-color: #d5e8f0;
 }
 
-.summary-view-container .nav-btn {
-    padding: 4px 8px;
-    font-size: 11px;
+/* Active (currently viewed) LineAggregator button */
+.line-agg-nav-btn.active {
+    background-color: #1E3A5F;
+    color: #ffffff;
+    border-color: #1E3A5F;
 }
 
-.summary-view-container .packing-container {
-    overflow-x: auto;
-    max-width: 100%;
+/* Pages container */
+.line-agg-pages {
+    margin-top: 8px;
+}
+
+/* Each individual page — shown/hidden by JS */
+.line-agg-page {
+    display: none; /* JS sets display:block for the active page */
 }
