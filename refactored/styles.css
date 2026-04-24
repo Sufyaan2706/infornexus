@@ -1,11 +1,15 @@
+/* ─── Base Typography & Global ──────────────────────────────────────────────── */
+
 h1 {
     text-align: center;
     text-transform: uppercase;
     color: black;
+    margin-bottom: 10px;
 }
 
 h2 {
     text-align: left;
+    margin: 10px 0;
 }
 
 p {
@@ -19,25 +23,31 @@ a {
     color: #008CBA;
 }
 
+img {
+    padding: 5px;
+    height: auto;
+}
+
 .m-logo {
     width: auto;
     height: 50px;
 }
 
+/* ─── Base Table ─────────────────────────────────────────────────────────────── */
 
-/* Base table styles */
 table {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     border-collapse: collapse;
     width: 100%;
+    font-size: 14px;
 }
 
 td,
 th {
     border: 1px solid #ddd;
     text-align: center;
-    padding: 3px;
+    padding: 8px;
 }
 
 tr:nth-child(even) {
@@ -56,31 +66,18 @@ th {
     color: white;
 }
 
-img {
-    padding: 5px;
-    height: 100px;
-}
+/* ─── Utility ────────────────────────────────────────────────────────────────── */
 
-.search-bar {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 10px;
-}
-
-
-.error {
-    color: red;
-    margin-top: 10px;
-}
-
+.error,
 .empty-pack-msg {
     color: red;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .loading {
     margin-top: 10px;
+    color: #555;
+    font-style: italic;
 }
 
 .bold-text {
@@ -91,66 +88,133 @@ img {
     color: #666;
 }
 
+.error-text {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.success-text {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* ─── Search Bar ─────────────────────────────────────────────────────────────── */
+
+.search-bar {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+}
+
+/* ─── Sections ───────────────────────────────────────────────────────────────── */
+
 .order-section {
     margin-bottom: 40px;
 }
 
 .line-agg-section {
     margin-bottom: 30px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
 }
 
-.pack-btn {
-    margin-top: 10px;
-    margin-bottom: 15px;
-    padding: 8px 16px;
-    background-color: #003366;
-    color: white;
-    border: none;
-    cursor: pointer;
+.line-agg-section>h3 {
+    margin: 0 0 12px 0;
+    color: #003366;
+    font-size: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
 }
 
-.pack-btn:hover {
-    background-color: #00509e;
-}
+/* ─── 3-Panel Layout (Paginated / All view) ──────────────────────────────────
+   On a 1920px screen the three panels sit side-by-side in one row:
+     • original-table-wrapper  — the raw order data   (flex: 2)
+     • packing-container       — packing table         (flex: 3)
+     • validation-container    — catalog verification  (flex: 1.5)
+   Narrower screens fall back gracefully via column wrapping.
+──────────────────────────────────────────────────────────────────────────── */
 
 .tables-container {
     display: flex;
-    gap: 20px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    /* side-by-side on 1920px */
+    gap: 16px;
     align-items: flex-start;
-    margin-top: 10px;
     width: 100%;
+    box-sizing: border-box;
+}
+
+
+.select-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.nav-select {
+    padding: 8px 12px;
+    border: 1px solid #003366;
+    background: white;
+    color: #003366;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+
+/* Wrap to rows below ~900px */
+@media (max-width: 900px) {
+    .tables-container {
+        flex-wrap: wrap;
+    }
 }
 
 .original-table-wrapper {
-    flex: 1;
+    flex: 2;
     min-width: 0;
+    /* lets flex shrink past content width */
+    overflow-x: auto;
 }
 
 .packing-container {
-    flex: 1;
+    flex: 3;
     min-width: 0;
     overflow-x: auto;
 }
 
+.validation-container {
+    flex: 1.5;
+    min-width: 180px;
+    overflow-x: auto;
+}
+
+.validation-container h4 {
+    margin: 0 0 8px 0;
+    color: #003366;
+    font-size: 13px;
+}
+
+/* ─── Packing Table ──────────────────────────────────────────────────────────── */
+
 .packing-table {
-    margin-top: 0;
-    font-size: 14px;
+    font-size: 13px;
     border: 1px solid #ccc;
 }
 
 .packing-table th,
 .packing-table td {
-    padding: 8px;
-}
-
-.packing-table thead {
-    background-color: #eee;
+    padding: 6px 8px;
 }
 
 .packing-table th {
     background-color: #eee;
     color: black;
-    /* Override base th */
     border-color: #ccc;
 }
 
@@ -164,23 +228,19 @@ img {
     color: #555;
     font-style: italic;
     padding: 5px;
+    white-space: nowrap;
 }
 
-.max-qty-header-input {
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
-    border: 1px solid #ccc;
-    padding: 4%;
-}
+/* ─── Inputs ─────────────────────────────────────────────────────────────────── */
 
+.max-qty-header-input,
 .weight-header-input {
     width: 100%;
     box-sizing: border-box;
     text-align: center;
     border: 1px solid #ccc;
-    padding: 4%;
-
+    padding: 3px 4px;
+    font-size: 13px;
 }
 
 .transparent-input {
@@ -191,6 +251,7 @@ img {
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
+    padding: 0;
 }
 
 .transparent-input:focus {
@@ -202,6 +263,55 @@ img {
     background-color: #fafafa;
 }
 
+/* ─── Verification Table ─────────────────────────────────────────────────────── */
+
+.verification-table {
+    font-size: 13px;
+    table-layout: fixed;
+    width: auto;
+    min-width: 260px;
+    max-width: 360px;
+}
+
+.verification-table col:nth-child(1) {
+    width: 120px;
+}
+
+.verification-table col:nth-child(2) {
+    width: 140px;
+}
+
+.verification-table th {
+    background-color: #003366;
+    color: white;
+    padding: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.verification-table td {
+    padding: 6px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.verification-table .val-weight-input {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 3px 4px;
+    font-size: 13px;
+}
+
+/* ─── Global Settings Panel ──────────────────────────────────────────────────── */
+
+.top-controls-wrapper {
+    margin-bottom: 20px;
+}
+
 .global-settings {
     margin-bottom: 20px;
     padding: 15px;
@@ -210,14 +320,26 @@ img {
     border-radius: 5px;
 }
 
+.settings-divider {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 16px 0;
+}
+
+.global-validation-container {
+    overflow-x: auto;
+}
+
 .global-settings h3 {
     margin-top: 0;
+    font-size: 16px;
+    margin-bottom: 28px;
 }
 
 .global-sizes-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
     justify-content: space-evenly;
 }
@@ -228,13 +350,14 @@ img {
     border-radius: 4px;
     background: white;
     text-align: center;
-    width: 100px;
+    width: 90px;
 }
 
 .global-size-block strong {
     display: block;
     margin-bottom: 8px;
     color: #003366;
+    font-size: 14px;
 }
 
 .global-size-block .input-group {
@@ -250,12 +373,31 @@ img {
     width: 100%;
     box-sizing: border-box;
     padding: 3px;
+    font-size: 12px;
 }
 
 .global-apply-block {
     width: 100%;
     text-align: center;
     margin-top: 15px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────────── */
+
+.pack-btn {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 8px 16px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+.pack-btn:hover {
+    background-color: #00509e;
 }
 
 .global-export-btn {

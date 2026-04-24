@@ -1,57 +1,86 @@
-import { fetchUidByPoNumber, fetchOrderData } from './api.js';
-import { renderTables } from './ui.js';
-import { escapeHTML } from './utils.js';
+import { ApiClient } from './api.js';
+import { AppState, UIController } from './ui.js';
+import { Utils } from './utils.js';
 import '../styles.css';
 
-const searchType = document.getElementById('searchType');
-const searchInput = document.getElementById('searchInput');
-const container = document.getElementById('container');
+class AppController {
+    constructor() {
+        this.searchType = document.getElementById('searchType');
+        this.searchInput = document.getElementById('searchInput');
+        this.container = document.getElementById('container');
+        this.state = new AppState();
+        this.ui = new UIController(this.state);
 
-async function searchData() {
-    const query = searchInput.value.trim();
-    const type = searchType.value;
-
-    if (!query) {
-        container.innerHTML = '<div class="error">Please enter a search value.</div>';
-        return;
+        this.init();
     }
 
-    container.innerHTML = `<div class="loading">Searching for <strong class="bold-text">${escapeHTML(query)}</strong>...</div>`;
+    init() {
+        document.getElementById('searchBtn')?.addEventListener('click', () => this.search());
+        this.searchInput?.addEventListener('keypress', e => e.key === 'Enter' && this.search());
+        this._setupViewControls();
+    }
 
-    try {
-        if (type === 'poNumber') {
-            const uids = await fetchUidByPoNumber(query);
-            container.innerHTML = `<h3>Found ${uids.length} Order(s) for PO: ${escapeHTML(query)}</h3><hr>`;
+    _setupViewControls() {
+        const controls = document.getElementById('viewControls');
+        if (controls) controls.style.display = 'inline-flex';
 
-            for (const uid of uids) {
-                await fetchAndRenderSingleOrder(uid);
-            }
-        } else {
-            container.innerHTML = '';
-            await fetchAndRenderSingleOrder(query);
+        const setView = (view, resetPage = false) => {
+            this.state.currentView = view;
+            if (resetPage) this.state.currentPage = 1;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active-view', b.id === `view${view.charAt(0).toUpperCase() + view.slice(1)}Btn`));
+            this.ui.render();
+        };
+
+        document.getElementById('viewSummaryBtn')?.addEventListener('click', () => setView('summary'));
+        document.getElementById('viewPaginatedBtn')?.addEventListener('click', () => setView('paginated', true));
+        document.getElementById('viewAllBtn')?.addEventListener('click', () => setView('all'));
+
+        const perPageInput = document.getElementById('itemsPerPage');
+        if (perPageInput) {
+            perPageInput.addEventListener('change', e => {
+                const val = parseInt(e.target.value, 10);
+                if (val > 0) {
+                    this.state.itemsPerPage = val;
+                    this.state.currentPage = 1;
+                    if (this.state.currentView === 'paginated') this.ui.render();
+                }
+            });
         }
-    } catch (error) {
-        console.error('Process Error:', error);
-        container.innerHTML = `<div class="error">Process Failed:<br>${escapeHTML(error.message)}</div>`;
+    }
+
+    async search() {
+        const query = this.searchInput.value.trim();
+        if (!query) return this._showError('Please enter a search value.');
+
+        this.container.innerHTML = `<div class="loading">Searching for <strong>${Utils.escapeHTML(query)}</strong>...</div>`;
+        try {
+            if (this.searchType.value === 'poNumber') {
+                const uids = await ApiClient.fetchUidByPoNumber(query);
+                this.container.innerHTML = `<h3>Found ${uids.length} Order(s)</h3><hr>`;
+                for (const uid of uids) await this._renderOrder(uid);
+            } else {
+                this.container.innerHTML = '';
+                await this._renderOrder(query);
+            }
+        } catch (error) {
+            this._showError(`Process Failed:<br>${Utils.escapeHTML(error.message)}`);
+        }
+    }
+
+    async _renderOrder(id) {
+        try {
+            const data = await ApiClient.fetchOrderData(id);
+            if (!data?.orderItem?.length) throw new Error("No items found.");
+            this.state.load(data, this.container);
+            this.ui.render();
+        } catch (error) {
+            this.container.appendChild(Utils.el('div', { className: 'error', html: `Failed to process ${Utils.escapeHTML(id)}: <br>${Utils.escapeHTML(error.message)}` }));
+        }
+    }
+
+    _showError(msg) {
+        this.container.innerHTML = `<div class="error">${msg}</div>`;
     }
 }
 
-async function fetchAndRenderSingleOrder(orderId) {
-    try {
-        const orderData = await fetchOrderData(orderId);
-        renderTables(orderData, container);
-    } catch (error) {
-        console.error('Error fetching details:', error);
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error';
-        errorDiv.innerHTML = `Failed to process order ${escapeHTML(orderId)}: <br>${escapeHTML(error.message)}`;
-        container.appendChild(errorDiv);
-    }
-}
-
-searchInput.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') searchData();
-});
-
-document.getElementById('searchBtn').addEventListener('click', searchData);
-
+new AppController();

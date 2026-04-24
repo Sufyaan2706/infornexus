@@ -1,108 +1,92 @@
-import { escapeHTML, compareSizes } from './utils.js';
+import { Utils } from './utils.js';
 
-export function extractOrderDataToJson(orderData) {
-    if (!orderData || !Array.isArray(orderData.orderItem)) {
-        console.error("Invalid order data format");
-        return null;
-    }
+export class OrderExporter {
+    static extractToJson(state) {
+        const orderData = state.orderData;
+        if (!orderData || !Array.isArray(orderData.orderItem)) return null;
 
-    const poNumber = orderData.poNumber ?? 'Unknown_PO';
-    const uid = orderData.orderUid ?? orderData.__metadata?.uid ?? 'Unknown_UID';
+        const poNumber = orderData.poNumber ?? 'Unknown_PO';
+        const uid = orderData.orderUid ?? orderData.__metadata?.uid ?? 'Unknown_UID';
+        const jsonSchema = { [poNumber]: { [uid]: {} } };
+        const lineAggsLevel = jsonSchema[poNumber][uid];
 
-    const jsonSchema = {
-        [poNumber]: {
-            [uid]: {}
-        }
-    };
+        orderData.orderItem.forEach(item => {
+            const bi = item.baseItem || {};
+            const ref = bi.reference || {};
+            const id = bi.itemIdentifier || {};
 
-    const lineAggsLevel = jsonSchema[poNumber][uid];
+            const lineAgg = ref.LineAggregator ?? 'Unknown';
+            const size = id.IdBuyerSize ?? 'Unknown';
 
-    orderData.orderItem.forEach((item) => {
-        const bi = item.baseItem || {};
-        const ref = bi.reference || {};
-        const id = bi.itemIdentifier || {};
-        const itemVar = bi.itemVariance || {};
-
-        const uvariance = parseFloat(itemVar.upperVariance || 0);
-        const lvariance = parseFloat(itemVar.lowerVariance || 0);
-        const lineAgg = ref.LineAggregator ?? 'Unknown';
-        const size = id.IdBuyerSize ?? 'Unknown';
-
-        if (!lineAggsLevel[lineAgg]) lineAggsLevel[lineAgg] = {};
-        if (!lineAggsLevel[lineAgg][size]) {
-            lineAggsLevel[lineAgg][size] = {
-                maxBoxQty: 0,
-                weightPerItem: 0,
+            lineAggsLevel[lineAgg] ??= {};
+            lineAggsLevel[lineAgg][size] ??= {
+                maxBoxQty: state.tableConfigs[lineAgg]?.maxQtyMap[size] || 0,
+                weightPerItem: state.validationWeights[size] || 0,
                 totalShipmentQtyPerSize: 0,
-                items: []
+                items: [],
+                packingDetails: []
             };
-        }
 
-        const qty = parseFloat(bi.quantity || 0);
-        const itemDetail = {
-            itemSequenceNo: id.ItemSequenceNumber ?? '',
-            cartonNumbers: "N/A",
-            shipMode: ref.AdidasShipMode ?? '',
-            itemSts: ref.ItemStatus ?? '',
-            quantity: qty,
-            variance: { ub: uvariance, lb: lvariance }
-        };
+            const qty = parseFloat(bi.quantity || 0);
+            lineAggsLevel[lineAgg][size].items.push({
+                itemSequenceNo: id.ItemSequenceNumber ?? '',
+                cartonNumbers: "N/A",
+                shipMode: ref.AdidasShipMode ?? '',
+                itemSts: ref.ItemStatus ?? '',
+                quantity: qty,
+                variance: {
+                    ub: parseFloat(bi.itemVariance?.upperVariance || 0),
+                    lb: parseFloat(bi.itemVariance?.lowerVariance || 0)
+                }
+            });
+            lineAggsLevel[lineAgg][size].totalShipmentQtyPerSize += qty;
+        });
 
-        lineAggsLevel[lineAgg][size].items.push(itemDetail);
-        lineAggsLevel[lineAgg][size].totalShipmentQtyPerSize += qty;
-    });
+        // 2. Enrich with real-time UI state
+        this._enrichFromState(lineAggsLevel, state.packingData);
 
-    for (const lineAgg in lineAggsLevel) {
-        const safeLineAggId = `packing-${lineAgg.replace(/\W/g, '_')}`;
-        const packingContainer = document.getElementById(safeLineAggId);
+        // 3. Sort and dump to console
+        return this._sortAndLogSchema(jsonSchema, poNumber, uid, lineAggsLevel);
+    }
 
-        if (packingContainer && packingContainer.querySelector('table')) {
-            for (const size in lineAggsLevel[lineAgg]) {
-                const sizeData = lineAggsLevel[lineAgg][size];
+    static _enrichFromState(lineAggsLevel, packingData) {
+        for (const lineAgg in packingData) {
+            if (!lineAggsLevel[lineAgg]) continue;
 
-                const maxQtyInput = packingContainer.querySelector(`.max-qty-header-input[data-size="${size}"]`);
-                if (maxQtyInput && maxQtyInput.value) sizeData.maxBoxQty = parseInt(maxQtyInput.value, 10);
+            const lines = packingData[lineAgg];
+            lines.forEach(packLine => {
+                const size = packLine.size;
+                if (lineAggsLevel[lineAgg][size]) {
+                    // Push the full packing row details into the size data
+                    lineAggsLevel[lineAgg][size].packingDetails.push(packLine);
 
-                const weightInput = packingContainer.querySelector(`.weight-header-input[data-size="${size}"]`);
-                if (weightInput && weightInput.value) sizeData.weightPerItem = parseFloat(weightInput.value);
-
-                sizeData.items.forEach(item => {
-                    const seq = escapeHTML(item.itemSequenceNo);
-                    const inputs = packingContainer.querySelectorAll(`.transparent-input[data-seq="${seq}"]`);
-                    const cartonNumbersList = [];
-
-                    inputs.forEach(input => {
-                        const tr = input.closest('tr');
-                        if (tr) cartonNumbersList.push(tr.cells[0].innerText.trim());
-                    });
-
-                    if (cartonNumbersList.length > 0) item.cartonNumbers = cartonNumbersList.join(", ");
-                });
-            }
+                    // Update the specific item's carton number based on sequence
+                    const targetItem = lineAggsLevel[lineAgg][size].items.find(i => i.itemSequenceNo === packLine.sequenceNumber);
+                    if (targetItem) {
+                        if (targetItem.cartonNumbers === "N/A") {
+                            targetItem.cartonNumbers = packLine.cartonLabel;
+                        } else {
+                            targetItem.cartonNumbers += `, ${packLine.cartonLabel}`;
+                        }
+                    }
+                }
+            });
         }
     }
 
-    const sortedJsonSchema = {
-        [poNumber]: {
-            [uid]: {}
-        }
-    };
+    static _sortAndLogSchema(schema, poNumber, uid, lineAggsLevel) {
+        const sorted = { [poNumber]: { [uid]: {} } };
+        const sortedAggs = sorted[poNumber][uid];
 
-    const sortedLineAggsLevel = sortedJsonSchema[poNumber][uid];
-    const sortedLineAggs = Object.keys(lineAggsLevel).sort();
-
-    sortedLineAggs.forEach(lineAgg => {
-        sortedLineAggsLevel[lineAgg] = {};
-
-        const sortedSizes = Object.keys(lineAggsLevel[lineAgg]).sort(compareSizes);
-
-        sortedSizes.forEach(size => {
-            sortedLineAggsLevel[lineAgg][size] = lineAggsLevel[lineAgg][size];
+        Object.keys(lineAggsLevel).sort().forEach(agg => {
+            sortedAggs[agg] = {};
+            Object.keys(lineAggsLevel[agg]).sort(Utils.compareSizes).forEach(size => {
+                sortedAggs[agg][size] = lineAggsLevel[agg][size];
+            });
         });
-    });
 
-    const jsonString = JSON.stringify(sortedJsonSchema, null, 2);
-    console.log(jsonString);
-
-    return sortedJsonSchema;
+        console.log('--- EXPORTED ORDER DATA ---');
+        console.log(JSON.stringify(sorted, null, 2));
+        return sorted;
+    }
 }

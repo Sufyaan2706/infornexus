@@ -1,27 +1,99 @@
-import { escapeHTML, compareSizes } from './utils.js';
-import { extractOrderDataToJson } from './export.js';
+import { Utils } from './utils.js';
+import { ApiClient } from './api.js';
+import { OrderExporter } from './export.js';
 
-export function renderTables(orderData, containerElement) {
-    if (!orderData || !Array.isArray(orderData.orderItem)) {
-        containerElement.innerHTML += `<div class="error">No order items found for UID: ${escapeHTML(orderData?.__metadata?.uid || 'Unknown')}.</div>`;
-        return;
+export class OrderItem {
+    constructor(item) {
+        this.bi = item.baseItem || {};
+        this.ref = this.bi.reference || {};
+        this.id = this.bi.itemIdentifier || {};
+        this.vr = this.bi.itemVariance || {};
+
+        this.size = this.id.IdBuyerSize;
+        this.lineAgg = this.ref.LineAggregator ?? 'Unknown';
+        this.qty = parseFloat(this.bi.quantity || 0);
+        this.buyerNumber = this.id.BuyerNumber;
+        this.mfgSize = this.ref.ManufacturingSize;
+    }
+}
+
+export class AppState {
+    constructor() {
+        this.orderData = null;
+        this.groups = {};
+        this.lineAggKeys = [];
+        this.tableConfigs = {};
+
+        this.packingData = {};
+        this.validationWeights = {};
+
+        this.currentView = 'paginated';
+        this.currentPage = 1;
+        this.itemsPerPage = 5;
+        this.container = null;
+        this.globalMaxMap = {};
+        this.sortedSizes = [];
+
+        this.moqValue = 8;
+        this.globalSizeTotals = {};
     }
 
-    const groups = {};
-    const allUniqueSizes = new Set();
+    load(orderData, container) {
+        this.orderData = orderData;
+        this.container = container;
+        this.tableConfigs = {};
+        this.packingData = {};
 
-    orderData.orderItem.forEach((item) => {
-        const bi = item.baseItem || {};
-        const ref = bi.reference || {};
-        const id = bi.itemIdentifier || {};
+        const allParsedItems = orderData.orderItem.map(raw => new OrderItem(raw));
 
-        const lineAgg = ref.LineAggregator ?? 'Unknown';
-        if (!groups[lineAgg]) groups[lineAgg] = [];
-        groups[lineAgg].push(item);
+        // 1. Calculate the "True" Global Totals for every size across all aggregators
+        this.globalSizeTotals = {};
+        allParsedItems.forEach(item => {
+            const s = item.size || 'Unknown';
+            this.globalSizeTotals[s] = (this.globalSizeTotals[s] || 0) + item.qty;
+        });
 
-        const size = id.IdBuyerSize;
-        if (size && size !== '-') {
-            allUniqueSizes.add(escapeHTML(size));
+        // 2. Filter items based on the current MOQ
+        const filteredItems = allParsedItems.filter(item =>
+            this.globalSizeTotals[item.size] >= this.moqValue
+        );
+
+        // Group the remaining filtered items
+        this.groups = Utils.groupBy(filteredItems, 'lineAgg');
+        this.lineAggKeys = Object.keys(this.groups);
+
+        const sizes = new Set(filteredItems
+            .map(item => item.size)
+            .filter(size => size && size !== '-')
+            .map(Utils.escapeHTML)
+        );
+        this.sortedSizes = Array.from(sizes).sort(Utils.compareSizes);
+    }
+
+    get paginatedKeys() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        return this.lineAggKeys.slice(start, start + this.itemsPerPage);
+    }
+
+    get totalPages() {
+        return Math.ceil(this.lineAggKeys.length / this.itemsPerPage);
+    }
+
+    ensureConfig(lineAgg, items) {
+
+        const validSizes = new Set(
+            items
+                .filter(item => item.qty > 0 && item.size && item.size !== '-')
+                .map(item => Utils.escapeHTML(item.size))
+        );
+
+        const existing = this.tableConfigs[lineAgg];
+
+        if (existing) {
+            Object.keys(existing.maxQtyMap).forEach(size => {
+                if (!validSizes.has(size)) delete existing.maxQtyMap[size];
+            });
+            return;
         }
     });
 
@@ -117,10 +189,14 @@ export function renderTables(orderData, containerElement) {
         document.querySelectorAll('.global-weight').forEach(input => {
             wMap[input.getAttribute('data-size')] = input.value;
         });
-        return { maxMap, wMap };
-    };
+        this.tableConfigs[lineAgg] = { maxQtyMap };
+    }
+}
 
-    const renderTriggers = [];
+export class UIController {
+    constructor(state) {
+        this.state = state;
+    }
 
     // ── Build each LineAggregator page
     lineAggKeys.forEach((lineAgg, index) => {
@@ -145,11 +221,16 @@ export function renderTables(orderData, containerElement) {
         lineAggSection.className = 'line-agg-section';
         lineAggSection.innerHTML = `<h3>Line Aggregator: ${escapeHTML(lineAgg)}</h3>`;
 
-        const tablesContainer = document.createElement('div');
-        tablesContainer.className = 'tables-container';
+        const uid = Utils.escapeHTML(this.state.orderData.__metadata?.uid || 'Unknown');
+        const wrapper = Utils.el('div', {
+            className: 'order-section',
+            html: `<h2>Order Details (UID: <span class="uid-text">${uid}</span>)</h2>`
+        });
+        this.state.container.appendChild(wrapper);
 
-        const originalTableWrapper = document.createElement('div');
-        originalTableWrapper.className = 'original-table-wrapper';
+        this._renderActiveView(wrapper);
+        this._renderExportButton();
+    }
 
         const table = document.createElement('table');
         table.innerHTML = `
@@ -189,17 +270,55 @@ export function renderTables(orderData, containerElement) {
             `;
         });
 
-        tbody.innerHTML += `
-            <tr class="total-row">
-                <td colspan="4"><strong class="bold-text">TOTAL QUANTITY</strong></td>
-                <td><strong class="bold-text">${totalQty}</strong></td>
-            </tr>
-        `;
-        originalTableWrapper.appendChild(table);
+        // MOQ Settings Bar
+        const moqBar = Utils.el('div', {
+            className: 'moq-settings-bar',
+            style: { background: '#f4f4f4', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }
+        });
 
-        const packingContainer = document.createElement('div');
-        packingContainer.className = 'packing-container';
-        packingContainer.id = `packing-${lineAgg.replace(/\W/g, '_')}`;
+        moqBar.innerHTML = `
+            <strong>Global MOQ Filter:</strong>
+            <input type="number" id="moq-input" value="${this.state.moqValue}" min="0" style="width: 80px; margin: 0 10px;">
+            <button id="apply-moq-btn" class="pack-btn">Update MOQ</button>
+            <small style="margin-left: 10px; color: #666;">(Sizes with total qty below this threshold will be hidden)</small>
+        `;
+
+        moqBar.querySelector('#apply-moq-btn').onclick = () => {
+            const val = parseInt(document.getElementById('moq-input').value, 10);
+            this.state.moqValue = isNaN(val) ? 0 : val;
+            this.state.tableConfigs = {};
+            this.state.load(this.state.orderData, this.state.container);
+            this.render();
+        };
+
+        topControlsWrap.appendChild(moqBar);
+
+        const settingsFlex = Utils.el('div', { style: { display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' } });
+
+        this._renderSettings(settingsFlex);
+
+        const valWrap = Utils.el('div', { className: 'global-validation-container', style: { flex: '1 1 40%', overflowX: 'auto' } });
+        settingsFlex.appendChild(valWrap);
+
+        const allItems = Object.values(this.state.groups).flat();
+        new ValidationUI(this.state).render(allItems, valWrap);
+
+        topControlsWrap.appendChild(settingsFlex);
+        this.state.container.appendChild(topControlsWrap);
+    }
+
+    _renderActiveView(wrapper) {
+        const views = {
+            summary: () => this._renderSummary(wrapper),
+            all: () => this._renderAggregators(this.state.lineAggKeys, wrapper),
+            paginated: () => {
+                this._renderAggregators(this.state.paginatedKeys, wrapper);
+                this._renderPagination(wrapper);
+            }
+        };
+        views[this.state.currentView]();
+    }
+
 
         tablesContainer.appendChild(originalTableWrapper);
         tablesContainer.appendChild(packingContainer);
@@ -207,14 +326,32 @@ export function renderTables(orderData, containerElement) {
         page.appendChild(lineAggSection);
         pagesContainer.appendChild(page);
 
-        const initialMaps = getGlobalMaps();
-        createPackingUI(items, packingContainer, initialMaps.maxMap, initialMaps.wMap);
+            btn.onclick = () => {
+                OrderExporter.extractToJson(this.state);
+            };
 
-        renderTriggers.push(() => {
-            const maps = getGlobalMaps();
-            createPackingUI(items, packingContainer, maps.maxMap, maps.wMap);
+            this.state.container.appendChild(btn);
+        }
+    }
+
+
+    _renderSettings(parentContainer) {
+        const wrap = Utils.el('div', { className: 'global-settings', style: { flex: '1 1 50%' } });
+        wrap.appendChild(Utils.el('h3', { html: 'Default Settings Per Size' }));
+
+        const grid = Utils.el('div', { className: 'global-sizes-container' });
+        this.state.sortedSizes.forEach(size => {
+            grid.appendChild(Utils.el('div', {
+                className: 'global-size-block',
+                html: `
+                    <strong>${size}</strong>
+                    <div class="input-group input-group-margin">
+                        Max Qty:<br>
+                        <input type="number" class="global-max-qty" data-size="${size}" value="${this.state.globalMaxMap[size] || 50}" min="1">
+                    </div>
+                `
+            }));
         });
-    });
 
     // Show the first LineAggregator page by default
     if (lineAggKeys.length > 0) {
@@ -227,6 +364,43 @@ export function renderTables(orderData, containerElement) {
         applyBtn.addEventListener('click', () => {
             renderTriggers.forEach(trigger => trigger());
         });
+
+        let statsHtml = '<h4 style="margin-top:0;">Global Size Totals (All Aggregators)</h4><div style="display: flex; gap: 10px; flex-wrap: wrap;">';
+        Object.entries(this.state.globalSizeTotals).sort((a, b) => Utils.compareSizes(a[0], b[0])).forEach(([size, total]) => {
+            const isExcluded = total < this.state.moqValue;
+            statsHtml += `
+                <div class="size-stat-badge" style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; background: ${isExcluded ? '#ffebee' : '#e8f5e9'}">
+                    <strong style="color: ${isExcluded ? '#c62828' : '#2e7d32'}">${Utils.escapeHTML(size)}:</strong> ${total}
+                    ${isExcluded ? ' <small>(Hidden)</small>' : ''}
+                </div>`;
+        });
+        statsHtml += '</div>';
+        statsHeader.innerHTML = statsHtml;
+        wrapper.appendChild(statsHeader);
+
+        // Individual Aggregator Sections
+        const container = Utils.el('div', { className: 'summary-view-container' });
+        this.state.lineAggKeys.forEach((agg, index) => {
+            const items = this.state.groups[agg];
+            const section = Utils.el('div', { className: 'line-agg-section' });
+
+            const btn = Utils.el('button', { className: 'nav-btn', html: 'Go to Editor' });
+            btn.onclick = () => {
+                this.state.currentView = 'paginated';
+                this.state.currentPage = Math.ceil((index + 1) / this.state.itemsPerPage);
+                this.render();
+            };
+
+            const header = Utils.el('div', { className: 'summary-header', html: `<h3>Line Aggregator: ${Utils.escapeHTML(agg)}</h3>` });
+            header.appendChild(btn);
+
+            const packWrap = Utils.el('div', { className: 'packing-container', style: { overflowX: 'auto' } });
+            new PackingUI(this.state, items, packWrap, agg).build();
+
+            section.append(header, packWrap);
+            container.appendChild(section);
+        });
+        wrapper.appendChild(container);
     }
 
     // Export button
@@ -249,58 +423,75 @@ export function renderTables(orderData, containerElement) {
 
 }
 
-export function createPackingUI(items, packingContainer, globalMaxQtyMap = {}, globalWeightMap = {}) {
-    packingContainer.innerHTML = '';
-    const maxQtyMap = {};
-    const weightMap = {};
+            const packWrap = Utils.el('div', { className: 'packing-container', id: `packing-${agg.replace(/\W/g, '_')}` });
+            new PackingUI(this.state, items, packWrap, agg).build();
+            tables.appendChild(packWrap);
 
-    items.forEach(item => {
-        const bi = item.baseItem || {};
-        const id = bi.itemIdentifier || {};
-        const size = escapeHTML(id.IdBuyerSize);
-        const qty = parseInt(bi.quantity, 10);
-        if (!isNaN(qty) && qty > 0 && size !== '-') {
-            maxQtyMap[size] = globalMaxQtyMap[size] > 0 ? globalMaxQtyMap[size] : 50;
-            weightMap[size] = globalWeightMap[size] !== undefined ? globalWeightMap[size] : '';
+            section.appendChild(tables);
+            wrapper.appendChild(section);
+        });
+    }
+
+    _buildDataTable(items) {
+        const wrapper = Utils.el('div', { className: 'original-table-wrapper' });
+        const headers = ['Size', 'Seq #', 'Ship Mode', 'Status', 'Qty', 'Mfg Size', 'Up Var', 'Low Var'];
+
+        const rows = items.map(i => `
+            <tr>
+                <td>${Utils.escapeHTML(i.size)}</td>
+                <td>${Utils.escapeHTML(i.id.ItemSequenceNumber)}</td>
+                <td>${Utils.escapeHTML(i.ref.AdidasShipMode)}</td>
+                <td>${Utils.escapeHTML(i.ref.ItemStatus)}</td>
+                <td>${Utils.escapeHTML(i.qty)}</td>
+                <td>${Utils.escapeHTML(i.mfgSize)}</td>
+                <td>${Utils.escapeHTML(i.vr.upperVariance)}</td>
+                <td>${Utils.escapeHTML(i.vr.lowerVariance)}</td>
+            </tr>
+        `);
+
+        const totalQty = items.reduce((s, i) => s + i.qty, 0);
+        const footer = `<td colspan="4"><strong>TOTAL</strong></td><td><strong>${totalQty}</strong></td><td colspan="3"></td>`;
+
+        wrapper.appendChild(Utils.buildTable(headers, rows, footer));
+        return wrapper;
+    }
+
+    _renderPagination(wrapper) {
+        if (this.state.totalPages <= 1) return;
+        const controls = Utils.el('div', { className: 'pagination-controls' });
+        for (let i = 1; i <= this.state.totalPages; i++) {
+            const btn = Utils.el('button', { className: `page-btn ${i === this.state.currentPage ? 'active-page' : ''}`, html: String(i) });
+            btn.onclick = () => { this.state.currentPage = i; this.render(); };
+            controls.appendChild(btn);
         }
-    });
-
-    renderPackingTable(items, maxQtyMap, weightMap, packingContainer);
+        wrapper.appendChild(controls);
+    }
 }
 
-function renderPackingTable(items, maxQtyMap, weightMap, container) {
-    const uniqueSizes = new Set();
-    const batches = [];
+export class PackingUI {
+    constructor(state, items, container, lineAgg) {
+        this.state = state;
+        this.items = items;
+        this.container = container;
+        this.lineAgg = lineAgg;
+    }
 
-    items.forEach(item => {
-        const bi = item.baseItem || {};
-        const id = bi.itemIdentifier || {};
+    build() {
+        this.state.ensureConfig(this.lineAgg, this.items);
+        this.render();
+    }
 
-        const size = escapeHTML(id.IdBuyerSize);
-        const qty = parseInt(bi.quantity, 10);
-        const seqNo = escapeHTML(id.ItemSequenceNumber || '');
+    render() {
+        const { maxQtyMap } = this.state.tableConfigs[this.lineAgg];
+        const { sizes, batches } = this._getBatches();
 
-        if (!isNaN(qty) && qty > 0 && size !== '-') {
-            uniqueSizes.add(size);
-
-            let placed = false;
-            for (let i = 0; i < batches.length; i++) {
-                if (!batches[i].some(bItem => bItem.size === size)) {
-                    batches[i].push({ size, qty, seqNo });
-                    placed = true;
-                    break;
-                }
-            }
-
-            if (!placed) {
-                batches.push([{ size, qty, seqNo }]);
-            }
+        if (!batches.length) {
+            this.container.innerHTML = '<div class="empty-pack-msg">No valid items found.</div>';
+            return;
         }
-    });
 
-    if (batches.length === 0) {
-        container.innerHTML = '<div class="empty-pack-msg">No valid items found to pack.</div>';
-        return;
+        this.container.innerHTML = this._getHTML(sizes, batches, maxQtyMap);
+        this._attachListeners();
     }
 
     const sizes = Array.from(uniqueSizes).sort(compareSizes);
@@ -376,34 +567,99 @@ function renderPackingTable(items, maxQtyMap, weightMap, container) {
                     html += rowHtml;
                     cartonNo++;
                 }
-            }
+                if (rem > 0) {
+                    rows += makeRow(String(cartonNo++), rem, 1);
+                }
+            });
         });
-    });
 
-    html += `</tbody></table>`;
-    container.innerHTML = html;
+        // Save generated lines to state
+        this.state.packingData[this.lineAgg] = currentPackingLines;
 
-    const headerInputs = container.querySelectorAll('.max-qty-header-input');
-    headerInputs.forEach(input => {
-        input.addEventListener('change', (e) => {
-            const updatedSize = e.target.getAttribute('data-size');
-            const newValue = parseInt(e.target.value, 10);
+        return `
+            <table class="packing-table">
+                <thead>
+                    <tr><th rowspan="2">CTN NO</th><th colspan="${sizes.length}">SIZE</th><th rowspan="2">TOTAL CTNS</th>
+                    <th rowspan="2">Seq #</th>
+                    <th rowspan="2">SHIPMENT QNTY</th></tr>
+                    <tr>${sizes.map(s => `<th>${s}</th>`).join('')}</tr>
+                    <tr><td>Max qty/box:</td>${sizes.map(s => `<td><input type="number" class="max-qty-header-input" data-size="${s}" value="${maxQtyMap[s] || ''}" min="1"></td>`).join('')}<td colspan="2"></td></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    }
 
-            if (newValue && newValue > 0) {
-                maxQtyMap[updatedSize] = newValue;
-                renderPackingTable(items, maxQtyMap, weightMap, container);
-            } else {
-                alert('Please enter a valid number greater than 0');
-                e.target.value = maxQtyMap[updatedSize] || '';
+    _attachListeners() {
+        this.container.querySelectorAll('.max-qty-header-input').forEach(i => i.addEventListener('change', e => {
+            const val = parseInt(e.target.value, 10);
+            if (val > 0) {
+                this.state.tableConfigs[this.lineAgg].maxQtyMap[e.target.dataset.size] = val;
+                this.render(); // This recalculates and overwrites `state.packingData` automatically!
             }
-        });
-    });
+        }));
+    }
+}
 
-    const weightInputs = container.querySelectorAll('.weight-header-input');
-    weightInputs.forEach(input => {
-        input.addEventListener('input', (e) => {
-            const updatedSize = e.target.getAttribute('data-size');
-            weightMap[updatedSize] = e.target.value;
+export class ValidationUI {
+    constructor(state) {
+        this.state = state;
+    }
+
+    async render(items, container) {
+        container.innerHTML = '<h4>Catalog Verification</h4><div class="loading">Fetching...</div>';
+        const catalog = await ApiClient.fetchBulkCatalog();
+        const buyers = [...new Set(items.map(i => i.buyerNumber).filter(Boolean))];
+
+        const mainBuyerNumber = buyers.length > 0 ? buyers[0] : 'Unknown';
+        const catalogItems = catalog?.item || catalog?.result || catalog || [];
+
+        const allDisplaySizes = [...new Set(
+            items.map(i => i.size).filter(s => s && s !== '-')
+        )].sort(Utils.compareSizes);
+
+        const rows = this._buildValidationRows(buyers, catalogItems, items, allDisplaySizes);
+        const headers = ['Listed Size', 'Net Weight'];
+
+        container.innerHTML = `<h4>Catalog Verification (Buyer No: ${Utils.escapeHTML(mainBuyerNumber)})</h4>`;
+        container.appendChild(Utils.buildTable(headers, rows, '', 'validation-table'));
+
+        // Attach listeners to grab the user's manual weight changes!
+        container.querySelectorAll('.val-weight-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const size = e.target.dataset.size;
+                this.state.validationWeights[size] = e.target.value;
+            });
+        });
+    }
+
+    _buildValidationRows(buyers, catalogItems, items, allDisplaySizes) {
+        let rows = [];
+
+        buyers.forEach(bNum => {
+            const found = catalogItems.filter(c => String(c.itemAttribute?.buyerItemNumber) === String(bNum));
+            const reqSizes = found.length
+                ? [...new Set(items.filter(i => i.buyerNumber === bNum).map(i => i.mfgSize))]
+                : allDisplaySizes;
+
+            reqSizes.forEach(size => {
+                const catalogItem = found.length
+                    ? found.find(c => String(c.itemAttribute?.ManufacturingSize) === String(size))
+                    : null;
+                const ok = !!catalogItem;
+                const netWeight = catalogItem?.itemAttribute?.['measurements/netWeight'] || '';
+
+                if (!this.state.validationWeights[size]) {
+                    this.state.validationWeights[size] = netWeight;
+                }
+
+                rows.push(`
+                    <tr class="${ok ? 'success-text' : 'error-text'}">
+                        <td>${Utils.escapeHTML(size)}</td>
+                        <td><input type="number" step="0.01" class="val-weight-input" data-size="${Utils.escapeHTML(size)}" value="${Utils.escapeHTML(this.state.validationWeights[size])}" placeholder="Weight"></td>
+                    </tr>
+                `);
+            });
         });
     });
 }

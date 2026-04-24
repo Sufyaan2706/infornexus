@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="image/favicon.webp" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
     <title>Order Detail Object</title>
 </head>
 
@@ -33,6 +34,17 @@
             <div class="container">
                 <div>
                     <h1>Order Details</h1>
+                </div>
+                <div class="view-controls" id="viewControls" style="display: none;">
+                    <button id="viewSummaryBtn" class="nav-btn">Summary View</button>
+                    <button id="viewPaginatedBtn" class="nav-btn active-view">Pages View</button>
+                    <button id="viewAllBtn" class="nav-btn">View All</button>
+
+                    <select id="itemsPerPage" class="nav-select">
+                        <option value="1">1 Table / Page</option>
+                        <option value="5" selected>5 Tables / Page</option>
+                        <option value="10">10 Tables / Page</option>
+                    </select>
                 </div>
 
                 <div class="table-style">
