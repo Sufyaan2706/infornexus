@@ -42,17 +42,28 @@ export class AppState {
 
         const allParsedItems = orderData.orderItem.map(raw => new OrderItem(raw));
 
-        // 1. Calculate the "True" Global Totals for every size across all aggregators
-        this.globalSizeTotals = {};
-        allParsedItems.forEach(item => {
-            const s = item.size || 'Unknown';
-            this.globalSizeTotals[s] = (this.globalSizeTotals[s] || 0) + item.qty;
-        });
+        // Step 1: Group ALL items first
+const groupedAll = Utils.groupBy(allParsedItems, 'lineAgg');
 
-        // 2. Filter items based on the current MOQ
-        const filteredItems = allParsedItems.filter(item =>
-            this.globalSizeTotals[item.size] >= this.moqValue
-        );
+// Step 2: Apply MOQ per group
+const filteredItems = [];
+
+Object.entries(groupedAll).forEach(([agg, items]) => {
+
+    // Calculate totals per size INSIDE this aggregator
+    const sizeTotals = {};
+    items.forEach(item => {
+        const s = item.size || 'Unknown';
+        sizeTotals[s] = (sizeTotals[s] || 0) + item.qty;
+    });
+
+    // Filter items based on THIS aggregator totals
+    const validItems = items.filter(item =>
+        sizeTotals[item.size] >= this.moqValue
+    );
+
+    filteredItems.push(...validItems);
+});
 
         // Group the remaining filtered items
         this.groups = Utils.groupBy(filteredItems, 'lineAgg');
